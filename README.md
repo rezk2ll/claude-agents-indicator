@@ -1,5 +1,8 @@
 # Claude Agents Indicator
 
+![elementary OS 8](https://img.shields.io/badge/elementary%20OS-8-64baff?logo=elementary&logoColor=white)
+![Pantheon](https://img.shields.io/badge/desktop-Pantheon-3689e6)
+
 A Wingpanel indicator for elementary OS that tracks your Claude Code sessions. When a session is waiting on you, you see it in the panel instead of finding out ten minutes later in some background tab.
 
 ![Screenshot](docs/screenshot.png)
@@ -17,7 +20,7 @@ Unofficial. Not affiliated with Anthropic.
 
 ## Requirements
 
-- elementary OS 8
+- elementary OS 8, or another distro running the Pantheon desktop (Wingpanel, Gala, elementary Terminal). Only elementary OS 8 is tested.
 - Claude Code with agent view (`claude agents --json`)
 - Optional: [cctop](https://github.com/tomstagl/cctop) as your status line, for the usage bars
 
