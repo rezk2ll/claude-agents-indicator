@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/io/github/claude-agents-indicator">
+    <file compressed="true">Indicator.css</file>
+    <file compressed="true" preprocess="xml-stripblanks">icons/scalable/status/claude-agents-symbolic.svg</file>
+    <file compressed="true" preprocess="xml-stripblanks">icons/scalable/status/claude-agents-attention-symbolic.svg</file>
+  </gresource>
+</gresources>
