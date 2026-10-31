@@ -19,6 +19,7 @@ core = static_library(
     'src/core/Preferences.vala',
     'src/core/Session.vala',
     'src/core/SessionMonitor.vala',
+    'src/core/TerminalFocus.vala',
     'src/core/Usage.vala',
     dependencies: glib_deps,
     pic: true,
