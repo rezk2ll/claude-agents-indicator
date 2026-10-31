@@ -81,6 +81,14 @@ public class ClaudeAgents.Tray : Object {
         agents.open_agent_view ();
     }
 
+    public void jump_after_refresh () {
+        ulong handler = 0;
+        handler = agents.monitor.changed.connect (() => {
+            agents.monitor.disconnect (handler);
+            jump ();
+        });
+    }
+
     private GenericArray<Entry> list_entries () {
         var monitor = agents.monitor;
         var entries = new GenericArray<Entry> ();
@@ -158,8 +166,10 @@ int main (string[] args) {
     // Autostart and the app menu can both launch it; a second launch just exits.
     var app = new Gtk.Application ("io.github.rezk2ll.ClaudeAgentsTray", (ApplicationFlags) 0);
     ClaudeAgents.Tray? tray = null;
+    var jump_when_started = false;
 
-    // For a keyboard shortcut: a second launch with --jump asks the running tray to go to the session.
+    // For a keyboard shortcut: a second launch with --jump asks the running tray to go to the session. With no
+    // tray running, this launch becomes the tray and jumps once it has the sessions.
     var jump = new SimpleAction ("jump", null);
     jump.activate.connect (() => {
         if (tray != null) {
@@ -179,8 +189,8 @@ int main (string[] args) {
             return 1;
         }
         if (!app.get_is_remote ()) {
-            stderr.printf ("claude-agents-tray is not running\n");
-            return 1;
+            jump_when_started = true;
+            return -1;
         }
         app.activate_action ("jump", null);
         try {
@@ -195,6 +205,9 @@ int main (string[] args) {
         if (tray == null) {
             app.hold ();
             tray = new ClaudeAgents.Tray ();
+            if (jump_when_started) {
+                tray.jump_after_refresh ();
+            }
         }
     });
     return app.run (args);
