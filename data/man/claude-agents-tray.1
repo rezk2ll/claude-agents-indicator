@@ -1,0 +1,29 @@
+.TH CLAUDE-AGENTS-TRAY 1 2026-10-31 "claude-agents-indicator 0.3.0"
+.SH NAME
+claude-agents-tray \- tray icon for the Claude Code sessions waiting on you
+.SH SYNOPSIS
+.B claude-agents-tray
+.RB [ \-\-jump ]
+.SH DESCRIPTION
+.B claude-agents-tray
+puts a StatusNotifierItem in the system tray. Its menu lists the sessions from
+.BR "claude agents" ,
+grouped as Needs You, Your Turn and Working, with the 5-hour and weekly usage
+when available. The icon switches to its attention state, and the label shows
+the count, while a session needs you.
+.PP
+Clicking a session selects its tab in tmux, kitty, WezTerm, Ghostty or Konsole,
+and raises its window on Sway, Hyprland, niri, KDE Plasma and X11. Otherwise it
+opens the agent view. Only one tray runs per session; a second launch exits.
+.SH OPTIONS
+.TP
+.B \-\-jump
+Go to the session that needs you, else to one whose turn it is, else open the
+agent view. A running tray does the jump; with none running, this launch
+becomes the tray. Meant for a keyboard shortcut.
+.SH FILES
+.TP
+.I $XDG_RUNTIME_DIR/claude-agents-status.json
+A copy of the Claude Code status line input, read for the usage limits.
+.SH SEE ALSO
+.BR claude-agents-status (1)

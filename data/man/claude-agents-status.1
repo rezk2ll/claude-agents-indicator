@@ -1,0 +1,32 @@
+.TH CLAUDE-AGENTS-STATUS 1 2026-10-31 "claude-agents-indicator 0.3.0"
+.SH NAME
+claude-agents-status \- print the Claude Code sessions for a status bar
+.SH SYNOPSIS
+.B claude-agents-status
+.RB [ \-\-waybar ]
+.RB [ \-\-follow ]
+.SH DESCRIPTION
+.B claude-agents-status
+prints one line summing up the sessions from
+.BR "claude agents" ,
+such as
+.IR "1 need you \(md 2 working" ,
+and exits.
+.SH OPTIONS
+.TP
+.B \-\-waybar
+Print the JSON a waybar custom module reads with
+.BR "\(dqreturn-type\(dq: \(dqjson\(dq" :
+the waiting count (or the session count when none waits) as text, the sessions
+and usage as the tooltip, and one of attention, ready, working, idle or error as
+the class.
+.TP
+.B \-\-follow
+Keep running and print a new line whenever the sessions change.
+.SH EXIT STATUS
+0 on success. 1 when claude cannot be run or does not answer within 10 seconds,
+except with
+.BR \-\-waybar ,
+which reports the error in its output and exits 0. 2 on a bad option.
+.SH SEE ALSO
+.BR claude-agents-tray (1)
