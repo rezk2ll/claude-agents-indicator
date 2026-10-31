@@ -51,6 +51,8 @@ namespace ClaudeAgents.Summary {
         } else if (lines.length > 0) {
             tooltip = string.joinv ("\n", lines);
         }
+        // Waybar reads both as Pango markup, and titles are free text.
+        tooltip = Markup.escape_text (tooltip);
         var output = new Json.Object ();
         output.set_string_member ("text", text);
         output.set_string_member ("tooltip", tooltip);

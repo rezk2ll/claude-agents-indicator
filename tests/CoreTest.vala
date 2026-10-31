@@ -134,10 +134,11 @@ void main (string[] args) {
         assert (Windows.sway_pids ("""{"pid": 8, "nodes": null, "floating_nodes": [3]}""").length == 1);
         assert (Windows.hyprland_pids ("""[1, null, {"pid": 5}]""").length == 1);
 
-        var script = Windows.kwin_script ({ 12, 34 }, ":1.42");
+        var script = Windows.kwin_script ({ 12, 34 }, ":1.42", 7);
         assert ("const pids = [12,34];" in script);
         assert ("workspace.activeWindow = match;" in script);
         assert ("""callDBus (":1.42", "/io/github/rezk2ll/ClaudeAgents",""" in script);
+        assert ("""Raise", "Missed", "7");""" in script);
     });
 
     Test.add_func ("/monitor/apply", () => {
@@ -187,6 +188,13 @@ void main (string[] args) {
         assert (waybar.get_string_member ("text") == "1");
         assert (waybar.get_string_member ("class") == "attention");
         assert ("Needs You: nightly fix · acme-web · permission prompt" in waybar.get_string_member ("tooltip"));
+
+        try {
+            parser.load_from_data (Summary.waybar (monitor.sessions, "<b> & co", null));
+        } catch (Error e) {
+            error (e.message);
+        }
+        assert (parser.get_root ().get_object ().get_string_member ("tooltip") == "&lt;b&gt; &amp; co");
     });
 
     Test.run ();

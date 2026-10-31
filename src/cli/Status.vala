@@ -54,6 +54,16 @@ int main (string[] args) {
         monitor.start ();
     } else {
         monitor.refresh.begin ();
+        // Bars run this on an interval, so a claude that hangs must not pile up processes.
+        Timeout.add_seconds (10, () => {
+            var error = "claude agents did not answer";
+            if (waybar) {
+                stdout.printf ("%s\n", ClaudeAgents.Summary.waybar (monitor.sessions, error, null));
+                Process.exit (0);
+            }
+            stdout.printf ("%s\n", error);
+            Process.exit (1);
+        });
     }
     loop.run ();
     // With --waybar the error is in the JSON's class, so the bar keeps showing the module.
