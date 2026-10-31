@@ -13,9 +13,28 @@ public class ClaudeAgents.GenericDesktop : Object, Desktop {
     }
 
     private Compositor compositor;
+    private DBusConnection? bus;
+    // The claude to open the agent view with if KWin finds no window for the last click.
+    private string? kwin_fallback;
 
     construct {
         compositor = detect_compositor ();
+        if (compositor == Compositor.KWIN) {
+            try {
+                bus = Bus.get_sync (BusType.SESSION);
+                var reply = new KWinReply ();
+                reply.missed.connect (() => {
+                    if (kwin_fallback != null) {
+                        open_agent_view (kwin_fallback);
+                        kwin_fallback = null;
+                    }
+                });
+                bus.register_object (Windows.KWIN_REPLY_PATH, reply);
+            } catch (Error e) {
+                warning ("Cannot reach KWin: %s", e.message);
+                compositor = Compositor.NONE;
+            }
+        }
     }
 
     public async void refresh_windows () {
@@ -37,6 +56,7 @@ public class ClaudeAgents.GenericDesktop : Object, Desktop {
         // A background session's parent may still be the terminal that dispatched it, which is not where it runs.
         var raised = !session.background && session.pid > 0 && compositor != Compositor.NONE
                      && raise_window (candidates (session));
+        kwin_fallback = raised && !selected && compositor == Compositor.KWIN ? claude_path : null;
         if (selected || raised) {
             return;
         }
@@ -118,11 +138,10 @@ public class ClaudeAgents.GenericDesktop : Object, Desktop {
 
     // KWin runs scripts from files, so the script is written to the runtime directory, loaded and run. KWin reads it
     // after run returns, so the previous one is unloaded on the next click instead of right away.
-    private static bool raise_with_kwin (int[] candidates) {
+    private bool raise_with_kwin (int[] candidates) {
         var path = Path.build_filename (Environment.get_user_runtime_dir (), KWIN_PLUGIN + ".js");
         try {
-            FileUtils.set_contents (path, Windows.kwin_script (candidates));
-            var bus = Bus.get_sync (BusType.SESSION);
+            FileUtils.set_contents (path, Windows.kwin_script (candidates, bus.unique_name));
             kwin_call (bus, "/Scripting", "org.kde.kwin.Scripting", "unloadScript", new Variant ("(s)", KWIN_PLUGIN));
             kwin_call (bus, "/Scripting", "org.kde.kwin.Scripting", "loadScript", new Variant ("(ss)", path, KWIN_PLUGIN));
             // start runs every loaded script that is not running yet. The id loadScript returns is no use: KWin 6
@@ -196,5 +215,16 @@ public class ClaudeAgents.GenericDesktop : Object, Desktop {
             warning ("Cannot run %s: %s", argv[0], e.message);
             return false;
         }
+    }
+}
+
+[DBus (name = "io.github.rezk2ll.ClaudeAgents.Raise")]
+private class ClaudeAgents.KWinReply : Object {
+    [DBus (visible = false)]
+    public signal void missed ();
+
+    [DBus (name = "Missed")]
+    public void report_missed () throws DBusError, IOError {
+        missed ();
     }
 }
