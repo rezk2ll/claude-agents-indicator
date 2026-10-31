@@ -14,8 +14,10 @@ public class ClaudeAgents.GenericDesktop : Object, Desktop {
 
     private Compositor compositor;
     private DBusConnection? bus;
-    // The claude to open the agent view with if KWin finds no window for the last click.
+    // The claude to open the agent view with if KWin finds no window for the last click. A miss for an older click
+    // arrives late and is ignored.
     private string? kwin_fallback;
+    private uint kwin_click = 0;
 
     construct {
         compositor = detect_compositor ();
@@ -23,8 +25,8 @@ public class ClaudeAgents.GenericDesktop : Object, Desktop {
             try {
                 bus = Bus.get_sync (BusType.SESSION);
                 var reply = new KWinReply ();
-                reply.missed.connect (() => {
-                    if (kwin_fallback != null) {
+                reply.missed.connect ((click) => {
+                    if (click == kwin_click.to_string () && kwin_fallback != null) {
                         open_agent_view (kwin_fallback);
                         kwin_fallback = null;
                     }
@@ -141,7 +143,7 @@ public class ClaudeAgents.GenericDesktop : Object, Desktop {
     private bool raise_with_kwin (int[] candidates) {
         var path = Path.build_filename (Environment.get_user_runtime_dir (), KWIN_PLUGIN + ".js");
         try {
-            FileUtils.set_contents (path, Windows.kwin_script (candidates, bus.unique_name));
+            FileUtils.set_contents (path, Windows.kwin_script (candidates, bus.unique_name, ++kwin_click));
             kwin_call (bus, "/Scripting", "org.kde.kwin.Scripting", "unloadScript", new Variant ("(s)", KWIN_PLUGIN));
             kwin_call (bus, "/Scripting", "org.kde.kwin.Scripting", "loadScript", new Variant ("(ss)", path, KWIN_PLUGIN));
             // start runs every loaded script that is not running yet. The id loadScript returns is no use: KWin 6
@@ -221,10 +223,11 @@ public class ClaudeAgents.GenericDesktop : Object, Desktop {
 [DBus (name = "io.github.rezk2ll.ClaudeAgents.Raise")]
 private class ClaudeAgents.KWinReply : Object {
     [DBus (visible = false)]
-    public signal void missed ();
+    public signal void missed (string click);
 
     [DBus (name = "Missed")]
-    public void report_missed () throws DBusError, IOError {
-        missed ();
+    // A string: KWin scripts pass JavaScript numbers with no fixed D-Bus type.
+    public void report_missed (string click) throws DBusError, IOError {
+        missed (click);
     }
 }

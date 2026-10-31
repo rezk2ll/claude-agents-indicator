@@ -28,6 +28,9 @@ core = static_library(
 )
 core_dep = declare_dependency(link_with: core, dependencies: glib_deps)
 
+# Needs no toolkit, so status bars get it without the tray app. The tray package ships it.
+executable('claude-agents-status', 'src/cli/Status.vala', dependencies: core_dep, install: true)
+
 wingpanel_dep = dependency('wingpanel', required: get_option('wingpanel'))
 if wingpanel_dep.found()
     indicators_dir = wingpanel_dep.get_variable(
@@ -70,8 +73,6 @@ if appindicator_dep.found()
         dependencies: [core_dep, dependency('gtk+-3.0'), appindicator_dep],
         install: true,
     )
-    # Ships with the tray app: waybar and other status bars sit on the same desktops.
-    executable('claude-agents-status', 'src/cli/Status.vala', dependencies: core_dep, install: true)
     install_data('data/claude-agents-tray.desktop', install_dir: get_option('datadir') / 'applications')
     install_data('data/claude-agents-tray.desktop', install_dir: get_option('sysconfdir') / 'xdg' / 'autostart')
     install_data(

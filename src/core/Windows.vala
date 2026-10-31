@@ -60,8 +60,9 @@ namespace ClaudeAgents.Windows {
     public const string KWIN_REPLY_INTERFACE = "io.github.rezk2ll.ClaudeAgents.Raise";
 
     // A KWin script that activates the window of the nearest candidate. Plasma 5 names windows "clients". KWin
-    // gives no result for a script, so when no window matches it calls Missed on reply_to over D-Bus.
-    public string kwin_script (int[] candidates, string reply_to) {
+    // gives no result for a script, so when no window matches it calls Missed on reply_to over D-Bus, with the
+    // click it was run for.
+    public string kwin_script (int[] candidates, string reply_to, uint click) {
         var list = new StringBuilder ();
         foreach (var pid in candidates) {
             list.append ("%s%d".printf (list.len > 0 ? "," : "", pid));
@@ -77,9 +78,9 @@ if (match) {
         workspace.activeClient = match;
     }
 } else {
-    callDBus ("%s", "%s", "%s", "Missed");
+    callDBus ("%s", "%s", "%s", "Missed", "%u");
 }
-""".printf (list.str, reply_to, KWIN_REPLY_PATH, KWIN_REPLY_INTERFACE);
+""".printf (list.str, reply_to, KWIN_REPLY_PATH, KWIN_REPLY_INTERFACE, click);
     }
 
     private int parent_of (int pid) {
