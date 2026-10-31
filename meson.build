@@ -58,5 +58,5 @@ shared_module(
 test('core', executable(
     'core-test',
     'tests/CoreTest.vala',
-    dependencies: core_dep,
+    dependencies: [core_dep, meson.get_compiler('vala').find_library('posix')],
 ))

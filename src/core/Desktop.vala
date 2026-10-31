@@ -1,4 +1,4 @@
-// What each desktop provides to find, raise and badge sessions. Every front end brings its own.
+// What each desktop provides to find, raise and badge sessions.
 public interface ClaudeAgents.Desktop : Object {
     // Called once per poll, before any session is located.
     public abstract async void refresh_windows ();

@@ -48,6 +48,15 @@ void main (string[] args) {
         assert (Category.from_status ("something-new") == Category.WORKING);
     });
 
+    Test.add_func ("/session/environ", () => {
+        var session = new Session ("s");
+        assert (session.environ ("PATH") == null);
+        // /proc/<pid>/environ holds the environment the process started with; PATH is never changed here.
+        session.pid = (int) Posix.getpid ();
+        assert (session.environ ("PATH") == Environment.get_variable ("PATH"));
+        assert (session.environ ("NOT_SET_ANYWHERE") == null);
+    });
+
     Test.add_func ("/monitor/apply", () => {
         var desktop = new FakeDesktop ();
         var monitor = new SessionMonitor (desktop);
@@ -77,4 +86,8 @@ void main (string[] args) {
     });
 
     Test.run ();
+
+    DirUtils.remove (Path.build_filename (home, ".claude", "projects"));
+    DirUtils.remove (Path.build_filename (home, ".claude"));
+    DirUtils.remove (home);
 }

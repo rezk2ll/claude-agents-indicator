@@ -18,24 +18,21 @@ public class ClaudeAgents.Indicator : Wingpanel.Indicator {
         );
 
         agents = new Agents (new PantheonDesktop ());
-        // Claude Desktop installs a themed icon; without it, keep the terminal the sessions run in.
-        if (Gtk.IconTheme.get_default ().has_icon ("claude-desktop")) {
-            agents.notifier.app_icon = "claude-desktop";
-        }
+        agents.activated.connect (() => close ());
+        var icon_theme = Gtk.IconTheme.get_default ();
+        icon_theme.changed.connect (() => pick_notification_icon (icon_theme));
+        pick_notification_icon (icon_theme);
 
         panel_widget = new PanelWidget (agents.monitor);
         popover_widget = new PopoverWidget (agents.monitor, agents.preferences);
-        popover_widget.session_activated.connect ((session) => {
-            agents.activate (session);
-            close ();
-        });
+        popover_widget.session_activated.connect ((session) => agents.activate (session));
         popover_widget.agent_view_requested.connect (() => {
             agents.open_agent_view ();
             close ();
         });
 
         visible = true;
-        agents.start ();
+        agents.monitor.start ();
     }
 
     public override Gtk.Widget get_display_widget () {
@@ -51,6 +48,11 @@ public class ClaudeAgents.Indicator : Wingpanel.Indicator {
     }
 
     public override void closed () {
+    }
+
+    // Claude Desktop installs a themed icon; without it, keep the terminal the sessions run in.
+    private void pick_notification_icon (Gtk.IconTheme theme) {
+        agents.notifier.app_icon = theme.has_icon ("claude-desktop") ? "claude-desktop" : "utilities-terminal";
     }
 }
 

@@ -1,5 +1,7 @@
-// The behavior every front end shares: polling, notifications and the dock badge.
 public class ClaudeAgents.Agents : Object {
+    // Raised for clicks from the popover and from notifications alike, so a front end can close its menu.
+    public signal void activated (Session session);
+
     public Desktop desktop { get; construct; }
     public SessionMonitor monitor { get; private set; }
     public Notifier notifier { get; private set; }
@@ -25,12 +27,9 @@ public class ClaudeAgents.Agents : Object {
         monitor.changed.connect (() => desktop.set_dock_badge (monitor.count (Category.ATTENTION)));
     }
 
-    public void start () {
-        monitor.start ();
-    }
-
     public void activate (Session session) {
         desktop.activate (session, monitor.claude_path);
+        activated (session);
     }
 
     public void open_agent_view () {

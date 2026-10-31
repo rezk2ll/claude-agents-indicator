@@ -29,11 +29,9 @@ public class ClaudeAgents.PantheonDesktop : Object, Desktop {
         }
     }
 
-    // io.elementary.terminal exports the id of the tab a process runs in; it is what its tab-focus action expects.
+    // PANTHEON_TERMINAL_ID is what io.elementary.terminal's tab-focus action expects.
     public void locate (Session session) {
-        if (session.terminal_id == null) {
-            session.terminal_id = session.environ ("PANTHEON_TERMINAL_ID");
-        }
+        session.terminal_id = session.environ ("PANTHEON_TERMINAL_ID");
         session.window_uid = session.background ? 0 : find_session_window (session.ai_title);
     }
 
@@ -126,12 +124,12 @@ public class ClaudeAgents.PantheonDesktop : Object, Desktop {
 
     // Claude names its terminal tab after the conversation, but a window title only shows the tab in front.
     // Terminal exposes no way to switch tabs, so a hidden tab falls back to a terminal window.
-    public uint64 find_session_window (string? title) {
+    private uint64 find_session_window (string? title) {
         var uid = find_window (title);
         return uid != 0 ? uid : terminal_window;
     }
 
-    public uint64 find_window (string? title) {
+    private uint64 find_window (string? title) {
         if (title == null || title == "") {
             return 0;
         }
@@ -144,7 +142,7 @@ public class ClaudeAgents.PantheonDesktop : Object, Desktop {
         return found;
     }
 
-    public void focus (uint64 uid) {
+    private void focus (uint64 uid) {
         if (gala == null) {
             return;
         }
@@ -166,7 +164,7 @@ public class ClaudeAgents.PantheonDesktop : Object, Desktop {
         }
     }
 
-    public void open_terminal (string? cwd, string[] command) {
+    private void open_terminal (string? cwd, string[] command) {
         string[] argv = { "io.elementary.terminal", "--new-window" };
         if (cwd != null && cwd != "") {
             argv += "--working-directory=" + cwd;

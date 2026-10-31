@@ -122,11 +122,7 @@ public class ClaudeAgents.SessionMonitor : Object {
             session.category = Category.from_status (session.status);
             session.started_at = obj.get_int_member_with_default ("startedAt", 0) / 1000;
 
-            var pid = (int) obj.get_int_member_with_default ("pid", 0);
-            if (pid != session.pid) {
-                session.pid = pid;
-                session.terminal_id = null;
-            }
+            session.pid = (int) obj.get_int_member_with_default ("pid", 0);
 
             read_transcript (session);
             desktop.locate (session);
@@ -223,7 +219,6 @@ public class ClaudeAgents.SessionMonitor : Object {
         }
         return null;
     }
-
 
     private static string project_dir_name (string cwd) {
         var result = new StringBuilder ();
