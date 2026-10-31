@@ -1,0 +1,22 @@
+Source: claude-agents-indicator
+Section: x11
+Priority: optional
+Maintainer: rezk2ll <6764881+rezk2ll@users.noreply.github.com>
+Build-Depends: debhelper-compat (= 13),
+               meson,
+               valac,
+               libglib2.0-dev,
+               libgtk-3-dev,
+               libjson-glib-dev,
+               libwingpanel-dev
+Standards-Version: 4.6.2
+Homepage: https://github.com/rezk2ll/claude-agents-indicator
+Rules-Requires-Root: no
+
+Package: claude-agents-indicator
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}, wingpanel
+Description: Wingpanel indicator for Claude Code sessions
+ Lists live Claude Code sessions in the elementary OS panel, badges the
+ panel and dock while a session waits on you, sends notifications, and
+ jumps to the session's Terminal tab on click.

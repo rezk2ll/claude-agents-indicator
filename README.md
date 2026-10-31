@@ -2,6 +2,7 @@
 
 ![elementary OS 8](https://img.shields.io/badge/elementary%20OS-8-64baff?logo=elementary&logoColor=white)
 ![Pantheon](https://img.shields.io/badge/desktop-Pantheon-3689e6)
+[![Build](https://github.com/rezk2ll/claude-agents-indicator/actions/workflows/build.yml/badge.svg)](https://github.com/rezk2ll/claude-agents-indicator/actions/workflows/build.yml)
 
 A Wingpanel indicator for elementary OS that tracks your Claude Code sessions. When a session is waiting on you, you see it in the panel instead of finding out ten minutes later in some background tab.
 
@@ -24,7 +25,18 @@ Unofficial. Not affiliated with Anthropic.
 - Claude Code with agent view (`claude agents --json`)
 - Optional: [cctop](https://github.com/tomstagl/cctop) as your status line, for the usage bars
 
-## Build and install
+## Install
+
+Download the `.deb` from the [latest release](https://github.com/rezk2ll/claude-agents-indicator/releases/latest), then:
+
+```sh
+sudo apt install ./claude-agents-indicator_*.deb
+killall io.elementary.wingpanel
+```
+
+The panel comes back on its own.
+
+## Build from source
 
 ```sh
 sudo apt install valac meson libwingpanel-dev libjson-glib-dev libgtk-3-dev libgee-0.8-dev
@@ -33,8 +45,6 @@ ninja -C build
 sudo ninja -C build install
 killall io.elementary.wingpanel
 ```
-
-The panel comes back on its own.
 
 ## How it works
 

@@ -1,1 +1,7 @@
 build/
+obj-*/
+debian/.debhelper/
+debian/claude-agents-indicator/
+debian/debhelper-build-stamp
+debian/files
+debian/*.substvars
