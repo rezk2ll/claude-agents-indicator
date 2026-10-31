@@ -129,16 +129,17 @@ $ claude-agents-status
 
 With `--waybar` it prints the JSON a [waybar custom module](https://github.com/Alexays/Waybar/wiki/Module:-Custom) reads: the waiting count as text, the sessions and usage as the tooltip, and `attention`, `ready`, `working`, `idle` or `error` as the class.
 
+With `--follow` it keeps running and prints a new line whenever the sessions change, so waybar needs no interval:
+
 ```json
 "custom/claude": {
-  "exec": "claude-agents-status --waybar",
+  "exec": "claude-agents-status --waybar --follow",
   "return-type": "json",
-  "interval": 3,
   "format": "✻ {}"
 }
 ```
 
-Style `#custom-claude.attention` to make it stand out. The plain form fits polybar, i3blocks or a tmux `status-right`.
+Style `#custom-claude.attention` to make it stand out. The plain form fits polybar (`tail = true` with `--follow`), i3blocks or a tmux `status-right`.
 
 ## Requirements
 

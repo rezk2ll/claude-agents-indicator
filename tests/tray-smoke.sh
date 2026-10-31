@@ -42,4 +42,6 @@ import json, sys
 out = json.load(sys.stdin)
 assert out["text"] == "1" and out["class"] == "attention", out
 assert "acme-api · permission prompt" in out["tooltip"], out'
+[ "$(PATH="$tests/fake:$PATH" HOME="$work/home" timeout 5 "$status" --follow | head -1)" = "1 need you · 1 your turn · 1 working" ] \
+    || { echo "FAIL: claude-agents-status --follow"; exit 1; }
 echo PASS
