@@ -22,7 +22,7 @@ class FakeDesktop : Object, Desktop {
 
 const string FIRST = """[
     {"id": "a1", "sessionId": "s-1", "cwd": "/home/me/acme-api", "kind": "interactive", "status": "busy", "pid": 0},
-    {"id": "b2", "kind": "background", "state": "waiting", "name": "nightly fix", "cwd": "/home/me/acme-web"}
+    {"id": "b2", "kind": "background", "state": "waiting", "waitingFor": "permission prompt", "name": "nightly fix", "cwd": "/home/me/acme-web"}
 ]""";
 
 const string SECOND = """[
@@ -157,6 +157,8 @@ void main (string[] args) {
         var background = monitor.lookup ("b2");
         assert (background != null && background.background);
         assert (background.title == "nightly fix");
+        assert (background.describe_status () == "permission prompt");
+        assert (monitor.lookup ("s-1").waiting_for == null);
         assert (monitor.lookup ("s-1").project == "acme-api");
 
         monitor.apply (SECOND);

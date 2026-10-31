@@ -29,6 +29,7 @@ expect() {
 expect "Status: NeedsAttention"
 expect "AttentionIconName: claude-agents-tray-attention"
 expect "Needs You"
+expect "acme-api · permission prompt"
 expect "nightly fix · acme-web"
 expect "Open Agent View"
 echo PASS

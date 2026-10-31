@@ -5,7 +5,7 @@ if [ -n "$FAKE_AGENTS_JSON" ]; then
 fi
 cat <<'JSON'
 [
- {"id":"a1","sessionId":"s-1","cwd":"/home/me/acme-api","kind":"interactive","status":"waiting","pid":0},
+ {"id":"a1","sessionId":"s-1","cwd":"/home/me/acme-api","kind":"interactive","status":"waiting","waitingFor":"permission prompt","pid":0},
  {"id":"c3","sessionId":"s-3","cwd":"/home/me/docs-site","kind":"interactive","status":"idle","pid":0},
  {"id":"b2","kind":"background","state":"busy","name":"nightly fix","cwd":"/home/me/acme-web"}
 ]

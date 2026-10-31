@@ -128,6 +128,9 @@ public class ClaudeAgents.Tray : Object {
     private static string describe (Session session) {
         // A session with no conversation title yet is titled after its project; say it once.
         var text = session.title == session.project ? session.title : "%s · %s".printf (session.title, session.project);
+        if (session.waiting_for != null) {
+            text = "%s · %s".printf (text, session.waiting_for);
+        }
         var age = Format.age (session.last_activity);
         return age != "" ? "%s · %s".printf (text, age) : text;
     }
