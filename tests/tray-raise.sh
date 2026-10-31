@@ -1,8 +1,9 @@
 #!/bin/bash
 # Opens two terminals, clicks the session in the tray menu, and checks that the session's terminal came to the front.
-# Usage: tests/tray-raise.sh x11|sway
+# Usage: tests/tray-raise.sh x11|sway|kwin
 #   x11:  needs Xvfb, xfwm4, xterm, xdotool, python3-gi and dbus-run-session
 #   sway: needs sway, foot, a font, python3-gi and dbus-run-session
+#   kwin: needs kwin_wayland, foot, a font, python3-gi and dbus-run-session
 set -euo pipefail
 
 mode=$1
@@ -22,6 +23,12 @@ case $mode in
         export XDG_RUNTIME_DIR="$work/run" WLR_BACKENDS=headless WLR_RENDERER=pixman WLR_LIBINPUT_NO_DEVICES=1
         mkdir -m 700 "$XDG_RUNTIME_DIR"
         : > "$work/sway.conf"
+        ;;
+    kwin)
+        export XDG_RUNTIME_DIR="$work/run" XDG_CURRENT_DESKTOP=KDE
+        mkdir -m 700 "$XDG_RUNTIME_DIR"
+        # kwin_wayland carries file capabilities, which containers refuse to exec; a copy has none.
+        cp "$(command -v kwin_wayland)" "$work/kwin_wayland"
         ;;
     *)
         echo "unknown mode $mode"
@@ -54,6 +61,17 @@ walk(json.load(sys.stdin))"
             }
             focus_other() { swaymsg "[pid=$1] focus" >/dev/null; }
             ;;
+        kwin)
+            "$WORK/kwin_wayland" --virtual --no-lockscreen --socket wayland-9 --width 800 --height 600 >"$WORK/kwin.log" 2>&1 &
+            for _ in $(seq 50); do [ -S "$XDG_RUNTIME_DIR/wayland-9" ] && break; sleep 0.2; done
+            sleep 2
+            export WAYLAND_DISPLAY=wayland-9
+            terminal() { foot "$@" >/dev/null 2>&1 & }
+            focus_pid() { python3 "$TESTS/kwin-script.py" "report (workspace.activeWindow ? workspace.activeWindow.pid : 0)"; }
+            focus_other() {
+                python3 "$TESTS/kwin-script.py" "workspace.activeWindow = workspace.windowList ().find (w => w.pid === $1); report (1)" >/dev/null
+            }
+            ;;
     esac
 
     terminal sh -c "echo \$\$ > $WORK/session.pid; exec sleep 600"
@@ -80,6 +98,7 @@ walk(json.load(sys.stdin))"
     if [ "$focused" != "$session_terminal" ]; then
         echo "FAIL: focused pid $focused, expected the session terminal $session_terminal"
         cat "$WORK/tray.log"
+        tail -20 "$WORK/kwin.log" 2>/dev/null || true
         exit 1
     fi
 ' _ "$mode"
