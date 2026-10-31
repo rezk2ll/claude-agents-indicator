@@ -21,6 +21,7 @@ core = static_library(
     'src/core/SessionMonitor.vala',
     'src/core/TerminalFocus.vala',
     'src/core/Usage.vala',
+    'src/core/Windows.vala',
     dependencies: glib_deps,
     pic: true,
 )

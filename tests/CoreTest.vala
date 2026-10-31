@@ -78,6 +78,48 @@ void main (string[] args) {
         env.insert ("WEZTERM_PANE", "12");
         var wezterm = string.joinv (" ", TerminalFocus.command ((name) => env.lookup (name)));
         assert (wezterm == "wezterm cli activate-pane --pane-id 12");
+
+        env.remove_all ();
+        env.insert ("GHOSTTY_SURFACE_ID", "0x00005555deadbeef");
+        var ghostty = TerminalFocus.command ((name) => env.lookup (name));
+        assert (ghostty[0] == "gdbus" && ghostty[9] == "present-surface" && ghostty[10] == "[<uint64 0x00005555deadbeef>]");
+
+        env.remove_all ();
+        env.insert ("KONSOLE_DBUS_SERVICE", ":1.42");
+        env.insert ("KONSOLE_DBUS_WINDOW", "/Windows/1");
+        env.insert ("KONSOLE_DBUS_SESSION", "/Sessions/3");
+        var konsole = string.joinv (" ", TerminalFocus.command ((name) => env.lookup (name)));
+        assert (konsole == "gdbus call --session --dest :1.42 --object-path /Windows/1 --method org.kde.konsole.Window.setCurrentSession 3");
+    });
+
+    Test.add_func ("/windows/ancestors", () => {
+        var chain = Windows.ancestors ((int) Posix.getpid ());
+        assert (chain.length >= 2);
+        assert (chain[0] == (int) Posix.getpid ());
+        assert (chain[1] == (int) Posix.getppid ());
+        assert (Windows.ancestors (0).length == 0);
+    });
+
+    Test.add_func ("/windows/match", () => {
+        assert (Windows.first_owner ({ 30, 20, 10 }, { 7, 10, 20 }) == 20);
+        assert (Windows.first_owner ({ 30 }, { 7 }) == 0);
+
+        var sway = """{"id": 1, "nodes": [{"id": 2, "nodes": [{"id": 3, "pid": 111, "nodes": []}],
+                       "floating_nodes": [{"id": 4, "pid": 222}]}]}""";
+        var sway_pids = Windows.sway_pids (sway);
+        assert (sway_pids.length == 2 && sway_pids[0] == 111 && sway_pids[1] == 222);
+
+        var hyprland_pids = Windows.hyprland_pids ("""[{"address": "0x1", "pid": 333}, {"address": "0x2", "pid": 444}]""");
+        assert (hyprland_pids.length == 2 && hyprland_pids[1] == 444);
+
+        var niri = """[{"id": 7, "pid": 555}, {"id": 9, "pid": 666}]""";
+        assert (Windows.niri_window (niri, { 1, 666, 555 }) == 9);
+        assert (Windows.niri_window (niri, { 1 }) == -1);
+        assert (Windows.sway_pids ("not json").length == 0);
+
+        var script = Windows.kwin_script ({ 12, 34 });
+        assert ("const pids = [12,34];" in script);
+        assert ("workspace.activeWindow = match;" in script);
     });
 
     Test.add_func ("/monitor/apply", () => {
