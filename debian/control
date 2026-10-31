@@ -28,6 +28,6 @@ Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}
 Description: Claude Code sessions in the system tray
  Lists live Claude Code sessions in a tray menu on any desktop with
- StatusNotifierItem support (KDE Plasma, Ubuntu's GNOME, XFCE, Cinnamon,
+ StatusNotifierItem support (KDE Plasma, Ubuntu's GNOME, Xfce, Cinnamon,
  MATE, Budgie, waybar), shows usage, sends notifications, and jumps to the
  session's tab in tmux, kitty or WezTerm.
