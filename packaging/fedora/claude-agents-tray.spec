@@ -18,11 +18,14 @@ Recommends:     xdg-terminal-exec
 Suggests:       tmux
 Suggests:       kitty
 Suggests:       wezterm
+Suggests:       konsole
+Suggests:       xdotool
 
 %description
 Lists live Claude Code sessions in a tray menu on any desktop with
-StatusNotifierItem support, shows usage, sends notifications, and jumps to
-the session's tab in tmux, kitty or WezTerm.
+StatusNotifierItem support, shows usage and sends notifications. A click
+selects the session's terminal tab and raises its window. Includes
+claude-agents-status for status bars.
 
 %prep
 %autosetup -n claude-agents-indicator-%{version}
@@ -48,3 +51,7 @@ desktop-file-validate %{buildroot}%{_datadir}/applications/claude-agents-tray.de
 %{_datadir}/applications/claude-agents-tray.desktop
 %{_datadir}/icons/hicolor/scalable/apps/claude-agents-tray*.svg
 %config(noreplace) %{_sysconfdir}/xdg/autostart/claude-agents-tray.desktop
+
+%changelog
+* Sat Oct 31 2026 rezk2ll <6764881+rezk2ll@users.noreply.github.com> - 0.3.0-1
+- First Fedora package
