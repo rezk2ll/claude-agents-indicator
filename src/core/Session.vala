@@ -53,6 +53,8 @@ public class ClaudeAgents.Session : Object {
     public bool background;
     public string status = "";
     public Category category = Category.WORKING;
+    // What a waiting session asks for, such as "permission prompt" or "input needed".
+    public string? waiting_for;
     public string? ai_title;
     public string? last_prompt;
     public int64 started_at;
@@ -131,7 +133,7 @@ public class ClaudeAgents.Session : Object {
     public string describe_status () {
         switch (status) {
             case "waiting":
-                return "waiting for you";
+                return waiting_for ?? "waiting for you";
             case "idle":
                 return "your turn";
             case "busy":

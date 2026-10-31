@@ -39,7 +39,7 @@ public class ClaudeAgents.Notifier : Object {
     }
 
     public void needs_you (Session session) {
-        var body = session.last_prompt != null
+        var body = session.last_prompt != null && session.waiting_for == null
             ? "%s · “%s”".printf (session.project, session.last_prompt)
             : "%s · %s".printf (session.project, session.describe_status ());
         send.begin (session, "%s needs you".printf (session.title), body, URGENCY_CRITICAL);

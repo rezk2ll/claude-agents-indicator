@@ -120,6 +120,8 @@ public class ClaudeAgents.SessionMonitor : Object {
             // Background sessions report "state", interactive ones report "status".
             session.status = obj.get_string_member_with_default (session.background ? "state" : "status", "");
             session.category = Category.from_status (session.status);
+            var waiting_for = obj.get_string_member_with_default ("waitingFor", "");
+            session.waiting_for = waiting_for != "" ? waiting_for : null;
             session.started_at = obj.get_int_member_with_default ("startedAt", 0) / 1000;
 
             session.pid = (int) obj.get_int_member_with_default ("pid", 0);
