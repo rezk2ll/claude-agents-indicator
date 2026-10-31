@@ -53,6 +53,8 @@ The panel restarts on its own.
 
 ### Tray app
 
+<img src="docs/tray.png" width="464" alt="The tray menu in XFCE, listing sessions by group with usage below">
+
 On Ubuntu and other desktops:
 
 ```sh
@@ -63,6 +65,27 @@ claude-agents-tray &
 It starts on its own from the next login. On stock GNOME (not Ubuntu's), install the [AppIndicator extension](https://extensions.gnome.org/extension/615/appindicator-support/) first, since GNOME has no tray of its own.
 
 Both packages are also attached to each [release](https://github.com/rezk2ll/claude-agents-indicator/releases/latest) as `.deb` files.
+
+On Arch, build the tray app from the latest commit with the bundled PKGBUILD:
+
+```sh
+git clone https://github.com/rezk2ll/claude-agents-indicator
+cd claude-agents-indicator/packaging/arch
+makepkg -si
+```
+
+On Fedora, build an RPM of the latest release from the bundled spec:
+
+```sh
+sudo dnf install rpmdevtools dnf-plugins-core
+git clone https://github.com/rezk2ll/claude-agents-indicator
+cd claude-agents-indicator/packaging/fedora
+rpmdev-setuptree
+spectool -g -R claude-agents-tray.spec
+sudo dnf builddep claude-agents-tray.spec
+rpmbuild -bb claude-agents-tray.spec
+sudo dnf install ~/rpmbuild/RPMS/*/claude-agents-tray-*.rpm
+```
 
 ## Jumping to a session
 
