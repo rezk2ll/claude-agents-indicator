@@ -75,6 +75,10 @@ if appindicator_dep.found()
         install: true,
     )
     install_man('data/man/claude-agents-tray.1')
+    install_subdir(
+        'data/gnome-shell/claude-agents@rezk2ll.github.io',
+        install_dir: get_option('datadir') / 'gnome-shell' / 'extensions',
+    )
     install_data('data/claude-agents-tray.desktop', install_dir: get_option('datadir') / 'applications')
     install_data('data/claude-agents-tray.desktop', install_dir: get_option('sysconfdir') / 'xdg' / 'autostart')
     install_data(

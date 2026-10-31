@@ -1,9 +1,10 @@
 #!/bin/bash
 # Opens two terminals, clicks the session in the tray menu, and checks that the session's terminal came to the front.
-# Usage: tests/tray-raise.sh x11|sway|kwin
-#   x11:  needs Xvfb, xfwm4, xterm, xdotool, python3-gi and dbus-run-session
-#   sway: needs sway, foot, a font, python3-gi and dbus-run-session
-#   kwin: needs kwin_wayland, foot, a font, python3-gi and dbus-run-session
+# Usage: tests/tray-raise.sh x11|sway|kwin|gnome
+#   x11:   needs Xvfb, xfwm4, xterm, xdotool, python3-gi and dbus-run-session
+#   sway:  needs sway, foot, a font, python3-gi and dbus-run-session
+#   kwin:  needs kwin_wayland, foot, a font, python3-gi and dbus-run-session
+#   gnome: needs gnome-shell, foot, a font, python3-gi, dbus-run-session and a running system bus
 set -euo pipefail
 
 mode=$1
@@ -32,6 +33,12 @@ case $mode in
         mkdir -m 700 "$XDG_RUNTIME_DIR"
         # kwin_wayland carries file capabilities, which containers refuse to exec; a copy has none.
         cp "$(command -v kwin_wayland)" "$work/kwin_wayland"
+        ;;
+    gnome)
+        export XDG_RUNTIME_DIR="$work/run" XDG_CURRENT_DESKTOP=GNOME XDG_SESSION_TYPE=wayland
+        mkdir -m 700 "$XDG_RUNTIME_DIR"
+        mkdir -p "$work/home/.local/share/gnome-shell/extensions"
+        cp -r "$tests/../data/gnome-shell/claude-agents@rezk2ll.github.io" "$work/home/.local/share/gnome-shell/extensions/"
         ;;
     *)
         echo "unknown mode $mode"
@@ -73,6 +80,22 @@ walk(json.load(sys.stdin))"
             focus_pid() { python3 "$TESTS/kwin-script.py" "report (workspace.activeWindow ? workspace.activeWindow.pid : 0)"; }
             focus_other() {
                 python3 "$TESTS/kwin-script.py" "workspace.activeWindow = workspace.windowList ().find (w => w.pid === $1); report (1)" >/dev/null
+            }
+            ;;
+        gnome)
+            gsettings set org.gnome.shell enabled-extensions "[\"claude-agents@rezk2ll.github.io\"]"
+            # Unsafe mode opens Eval, which the test reads and moves the focus with.
+            gnome-shell --headless --wayland --no-x11 --unsafe-mode --virtual-monitor 800x600 >"$WORK/gnome-shell.log" 2>&1 &
+            shell_eval() {
+                gdbus call --session --dest org.gnome.Shell --object-path /org/gnome/Shell --method org.gnome.Shell.Eval "$1" \
+                    | sed -n "s/^(true, .\(.*\).)$/\1/p"
+            }
+            for _ in $(seq 60); do [ -n "$(shell_eval 1 2>/dev/null)" ] && break; sleep 0.5; done
+            export WAYLAND_DISPLAY=wayland-0
+            terminal() { foot "$@" >/dev/null 2>&1 & }
+            focus_pid() { shell_eval "global.display.focus_window ? global.display.focus_window.get_pid () : 0"; }
+            focus_other() {
+                shell_eval "global.display.list_all_windows ().find (w => w.get_pid () === $1).activate (global.get_current_time ())" >/dev/null
             }
             ;;
     esac

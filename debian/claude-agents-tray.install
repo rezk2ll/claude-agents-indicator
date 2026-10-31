@@ -4,4 +4,5 @@ usr/share/man/man1/claude-agents-tray.1
 usr/share/man/man1/claude-agents-status.1
 usr/share/applications
 usr/share/icons
+usr/share/gnome-shell
 etc/xdg/autostart

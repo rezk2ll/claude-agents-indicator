@@ -1,7 +1,8 @@
 // Works on any desktop: tabs are selected through the terminal's own remote control, and the terminal's window
-// is raised through the compositor (Sway, Hyprland, niri, KWin) or, on X11, through xdotool.
+// is raised through the compositor (Sway, Hyprland, niri, KWin, GNOME Shell) or, on X11, through xdotool.
 public class ClaudeAgents.GenericDesktop : Object, Desktop {
     private const string KWIN_PLUGIN = "claude-agents-raise";
+    private const string GNOME_EXTENSION = "io.github.rezk2ll.ClaudeAgents.Shell";
 
     private enum Compositor {
         NONE,
@@ -9,6 +10,7 @@ public class ClaudeAgents.GenericDesktop : Object, Desktop {
         HYPRLAND,
         NIRI,
         KWIN,
+        GNOME,
         X11,
     }
 
@@ -125,6 +127,8 @@ public class ClaudeAgents.GenericDesktop : Object, Desktop {
                 return id >= 0 && run ({ "niri", "msg", "action", "focus-window", "--id", id.to_string () }) != null;
             case Compositor.KWIN:
                 return raise_with_kwin (candidates);
+            case Compositor.GNOME:
+                return raise_with_gnome (candidates);
             case Compositor.X11:
                 foreach (var pid in candidates) {
                     var windows = run ({ "xdotool", "search", "--onlyvisible", "--pid", pid.to_string () });
@@ -156,6 +160,26 @@ public class ClaudeAgents.GenericDesktop : Object, Desktop {
         }
     }
 
+    // GNOME on Wayland lets no app raise another app's window, so this needs the Claude Agents shell extension.
+    // Without it the call fails and the click falls back as on a desktop with no compositor support.
+    private bool raise_with_gnome (int[] candidates) {
+        var pids = new VariantBuilder (new VariantType ("ai"));
+        foreach (var pid in candidates) {
+            pids.add ("i", pid);
+        }
+        try {
+            var reply = Bus.get_sync (BusType.SESSION).call_sync (
+                GNOME_EXTENSION, "/io/github/rezk2ll/ClaudeAgents/Shell", GNOME_EXTENSION, "Activate",
+                new Variant.tuple ({ pids.end () }), new VariantType ("(b)"), DBusCallFlags.NONE, 2000
+            );
+            bool found;
+            reply.get ("(b)", out found);
+            return found;
+        } catch (Error e) {
+            return false;
+        }
+    }
+
     private static Variant kwin_call (DBusConnection bus, string path, string iface, string method, Variant? args) throws Error {
         return bus.call_sync ("org.kde.KWin", path, iface, method, args, null, DBusCallFlags.NONE, 2000);
     }
@@ -172,8 +196,9 @@ public class ClaudeAgents.GenericDesktop : Object, Desktop {
             return Compositor.KWIN;
         } else if (Environment.get_variable ("XDG_SESSION_TYPE") != "wayland" && Environment.get_variable ("DISPLAY") != null) {
             return has ("xdotool") ? Compositor.X11 : Compositor.NONE;
+        } else if ((Environment.get_variable ("XDG_CURRENT_DESKTOP") ?? "").contains ("GNOME")) {
+            return Compositor.GNOME;
         }
-        // GNOME on Wayland lets no other program raise a window.
         return Compositor.NONE;
     }
 
