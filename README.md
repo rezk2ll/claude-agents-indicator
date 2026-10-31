@@ -99,7 +99,13 @@ The tray app selects the right tab when the session runs inside:
 - Ghostty 1.4 or later
 - Konsole
 
-It also brings the session's terminal window to the front on Sway, Hyprland, niri and KDE Plasma, and on X11 desktops when `xdotool` is installed. GNOME on Wayland lets no app raise another app's window, so there the tab is selected but the window stays where it is.
+It also brings the session's terminal window to the front on Sway, Hyprland, niri and KDE Plasma, and on X11 desktops when `xdotool` is installed. GNOME on Wayland lets no app raise another app's window, so the tray package ships a small GNOME Shell extension that does it. Turn it on once, then log out and back in:
+
+```sh
+gnome-extensions enable claude-agents@rezk2ll.github.io
+```
+
+Without it, the tab is still selected but the window stays where it is.
 
 When none of this applies, clicking the session opens the agent view instead. Background sessions open in your default terminal (`xdg-terminal-exec`, or `x-terminal-emulator` on Debian and Ubuntu).
 

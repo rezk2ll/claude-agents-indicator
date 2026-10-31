@@ -1,0 +1,7 @@
+{
+  "uuid": "claude-agents@rezk2ll.github.io",
+  "name": "Claude Agents",
+  "description": "Lets the Claude Agents tray app bring a session's terminal window to the front.",
+  "shell-version": ["45", "46", "47", "48", "49"],
+  "url": "https://github.com/rezk2ll/claude-agents-indicator"
+}
