@@ -12,6 +12,7 @@ optdepends=('tmux: raise sessions running in tmux'
             'kitty: raise sessions running in kitty'
             'wezterm: raise sessions running in WezTerm'
             'xdg-terminal-exec: open background sessions in your default terminal')
+backup=(etc/xdg/autostart/claude-agents-tray.desktop)
 provides=(claude-agents-tray)
 conflicts=(claude-agents-tray)
 source=("claude-agents-indicator::git+$url.git")

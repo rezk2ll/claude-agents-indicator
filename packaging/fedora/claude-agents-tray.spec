@@ -13,6 +13,11 @@ BuildRequires:  pkgconfig(gtk+-3.0)
 BuildRequires:  pkgconfig(json-glib-1.0)
 BuildRequires:  pkgconfig(ayatana-appindicator3-0.1)
 BuildRequires:  desktop-file-utils
+Requires:       hicolor-icon-theme
+Recommends:     xdg-terminal-exec
+Suggests:       tmux
+Suggests:       kitty
+Suggests:       wezterm
 
 %description
 Lists live Claude Code sessions in a tray menu on any desktop with

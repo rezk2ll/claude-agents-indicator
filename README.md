@@ -74,7 +74,18 @@ cd claude-agents-indicator/packaging/arch
 makepkg -si
 ```
 
-On Fedora, [`packaging/fedora/claude-agents-tray.spec`](packaging/fedora/claude-agents-tray.spec) builds an RPM from a release tarball with `rpmbuild`.
+On Fedora, build an RPM of the latest release from the bundled spec:
+
+```sh
+sudo dnf install rpmdevtools dnf-plugins-core
+git clone https://github.com/rezk2ll/claude-agents-indicator
+cd claude-agents-indicator/packaging/fedora
+rpmdev-setuptree
+spectool -g -R claude-agents-tray.spec
+sudo dnf builddep claude-agents-tray.spec
+rpmbuild -bb claude-agents-tray.spec
+sudo dnf install ~/rpmbuild/RPMS/*/claude-agents-tray-*.rpm
+```
 
 ## Jumping to a session
 

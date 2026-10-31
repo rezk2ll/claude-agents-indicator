@@ -57,10 +57,6 @@ jobs:
             install: apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends meson valac gcc libgtk-3-dev libjson-glib-dev libayatana-appindicator3-dev python3-gi gir1.2-glib-2.0 xvfb dbus-daemon
           - image: debian:trixie
             install: apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends meson valac gcc libgtk-3-dev libjson-glib-dev libayatana-appindicator3-dev python3-gi gir1.2-glib-2.0 xvfb dbus-daemon
-          - image: fedora:latest
-            install: dnf install -y meson vala gcc gtk3-devel json-glib-devel libayatana-appindicator-gtk3-devel python3-gobject xorg-x11-server-Xvfb dbus-daemon
-          - image: archlinux:latest
-            install: pacman -Syu --noconfirm --needed meson vala gcc pkgconf gtk3 json-glib libayatana-appindicator python-gobject xorg-server-xvfb
     name: tray (${{ matrix.image }})
     container: ${{ matrix.image }}
     steps:
@@ -109,10 +105,14 @@ jobs:
     runs-on: ubuntu-24.04
     container: fedora:latest
     steps:
-      - name: Install packaging tools
-        run: dnf install -y git rpm-build rpmdevtools dnf-plugins-core
+      - name: Install packaging and test tools
+        run: dnf install -y git rpm-build rpmdevtools dnf-plugins-core python3-gobject xorg-x11-server-Xvfb dbus-daemon
 
       - uses: actions/checkout@v7
+
+      - name: Check the tag matches the spec
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: test "v$(rpmspec -q --srpm --qf '%{version}' packaging/fedora/claude-agents-tray.spec)" = "$GITHUB_REF_NAME"
 
       - name: Build and install the RPM
         run: |
@@ -125,12 +125,15 @@ jobs:
           rpmbuild -bb $spec
           dnf install -y ~/rpmbuild/RPMS/*/claude-agents-tray-$version-*.rpm
 
+      - name: Smoke test the installed app
+        run: tests/tray-smoke.sh /usr/bin/claude-agents-tray
+
   arch:
     runs-on: ubuntu-24.04
     container: archlinux:latest
     steps:
-      - name: Install packaging tools
-        run: pacman -Syu --noconfirm --needed base-devel git
+      - name: Install packaging and test tools
+        run: pacman -Syu --noconfirm --needed base-devel git python-gobject xorg-server-xvfb
 
       - uses: actions/checkout@v7
         with:
@@ -139,10 +142,16 @@ jobs:
       - name: Build and install the package from this checkout
         run: |
           git config --system --add safe.directory '*'
+          # makepkg checks out a branch, and the checkout is a detached HEAD.
+          git switch -C ci
           useradd -m builder
           echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
           install -d -o builder /tmp/pkg
-          sed "s|git+\$url.git|git+file://$PWD|" packaging/arch/PKGBUILD > /tmp/pkg/PKGBUILD
+          sed "s|git+\$url.git|git+file://$PWD#branch=ci|" packaging/arch/PKGBUILD > /tmp/pkg/PKGBUILD
+          grep -q "git+file://$PWD#branch=ci" /tmp/pkg/PKGBUILD
           chown builder /tmp/pkg/PKGBUILD
           cd /tmp/pkg
           su builder -c 'makepkg -si --noconfirm'
+
+      - name: Smoke test the installed app
+        run: tests/tray-smoke.sh /usr/bin/claude-agents-tray
