@@ -1,10 +1,7 @@
 public class ClaudeAgents.Indicator : Wingpanel.Indicator {
     private const string RESOURCE_PATH = "/io/github/claude-agents-indicator";
 
-    private Desktop desktop;
-    private SessionMonitor monitor;
-    private Notifier notifier;
-    private Preferences preferences;
+    private Agents agents;
     private PanelWidget panel_widget;
     private PopoverWidget popover_widget;
 
@@ -20,31 +17,25 @@ public class ClaudeAgents.Indicator : Wingpanel.Indicator {
             Gdk.Screen.get_default (), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
         );
 
-        desktop = new Desktop ();
-        preferences = new Preferences ();
-        notifier = new Notifier ();
-        monitor = new SessionMonitor (desktop);
+        agents = new Agents (new PantheonDesktop ());
+        // Claude Desktop installs a themed icon; without it, keep the terminal the sessions run in.
+        if (Gtk.IconTheme.get_default ().has_icon ("claude-desktop")) {
+            agents.notifier.app_icon = "claude-desktop";
+        }
 
-        panel_widget = new PanelWidget (monitor);
-        popover_widget = new PopoverWidget (monitor, preferences);
-        popover_widget.session_activated.connect (activate_session);
+        panel_widget = new PanelWidget (agents.monitor);
+        popover_widget = new PopoverWidget (agents.monitor, agents.preferences);
+        popover_widget.session_activated.connect ((session) => {
+            agents.activate (session);
+            close ();
+        });
         popover_widget.agent_view_requested.connect (() => {
-            desktop.open_agent_view (monitor.claude_path);
+            agents.open_agent_view ();
             close ();
         });
 
-        notifier.activated.connect ((key) => {
-            var session = monitor.lookup (key);
-            if (session != null) {
-                activate_session (session);
-            }
-        });
-        monitor.transitioned.connect (on_transition);
-        monitor.removed.connect ((session) => notifier.withdraw (session.key));
-        monitor.changed.connect (() => desktop.set_dock_badge (monitor.count (Category.ATTENTION)));
-
         visible = true;
-        monitor.start ();
+        agents.start ();
     }
 
     public override Gtk.Widget get_display_widget () {
@@ -56,37 +47,10 @@ public class ClaudeAgents.Indicator : Wingpanel.Indicator {
     }
 
     public override void opened () {
-        monitor.refresh.begin ();
+        agents.monitor.refresh.begin ();
     }
 
     public override void closed () {
-    }
-
-    private void on_transition (Session session, Category previous, bool is_new) {
-        if (session.category == Category.ATTENTION) {
-            if (preferences.notifications) {
-                notifier.needs_you (session);
-            }
-        } else if (!is_new && session.category == Category.READY && previous == Category.WORKING) {
-            if (preferences.notifications) {
-                notifier.finished (session);
-            } else {
-                notifier.withdraw (session.key);
-            }
-        } else {
-            notifier.withdraw (session.key);
-        }
-    }
-
-    private void activate_session (Session session) {
-        if (session.terminal_id != null) {
-            desktop.focus_terminal_tab (session.terminal_id);
-        } else if (session.window_uid != 0) {
-            desktop.focus (session.window_uid);
-        } else if (session.background) {
-            desktop.open_terminal (session.cwd, { monitor.claude_path, "attach", session.id });
-        }
-        close ();
     }
 }
 

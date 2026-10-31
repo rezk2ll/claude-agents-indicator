@@ -69,6 +69,30 @@ public class ClaudeAgents.Session : Object {
         this.key = key;
     }
 
+    // Terminals export the id of the tab a process runs in (PANTHEON_TERMINAL_ID, KITTY_WINDOW_ID, TMUX_PANE...).
+    public string? environ (string name) {
+        if (pid <= 0) {
+            return null;
+        }
+        uint8[] data;
+        try {
+            FileUtils.get_data ("/proc/%d/environ".printf (pid), out data);
+        } catch (FileError e) {
+            return null;
+        }
+        var prefix = name + "=";
+        // Entries are NUL-terminated; the extra NUL guards a truncated last entry.
+        data += 0;
+        for (int start = 0; start < data.length - 1;) {
+            unowned string entry = (string) (&data[start]);
+            if (entry.has_prefix (prefix)) {
+                return entry.substring (prefix.length);
+            }
+            start += entry.length + 1;
+        }
+        return null;
+    }
+
     public string project {
         owned get {
             return Path.get_basename (cwd);

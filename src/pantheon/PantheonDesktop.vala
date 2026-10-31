@@ -9,7 +9,7 @@ public interface ClaudeAgents.GalaDesktop : Object {
     public abstract async void focus_window (uint64 uid) throws GLib.DBusError, GLib.IOError;
 }
 
-public class ClaudeAgents.Desktop : Object {
+public class ClaudeAgents.PantheonDesktop : Object, Desktop {
     private const string AGENT_VIEW_TITLE = "claude agents";
     private const string TERMINAL_APP_ID = "io.elementary.terminal.desktop";
     private const string LAUNCHER_ENTRY_PATH = "/io/github/claude_agents_indicator";
@@ -29,8 +29,26 @@ public class ClaudeAgents.Desktop : Object {
         }
     }
 
+    // io.elementary.terminal exports the id of the tab a process runs in; it is what its tab-focus action expects.
+    public void locate (Session session) {
+        if (session.terminal_id == null) {
+            session.terminal_id = session.environ ("PANTHEON_TERMINAL_ID");
+        }
+        session.window_uid = session.background ? 0 : find_session_window (session.ai_title);
+    }
+
+    public void activate (Session session, string claude_path) {
+        if (session.terminal_id != null) {
+            focus_terminal_tab (session.terminal_id);
+        } else if (session.window_uid != 0) {
+            focus (session.window_uid);
+        } else if (session.background) {
+            open_terminal (session.cwd, { claude_path, "attach", session.id });
+        }
+    }
+
     // Terminal's own "process finished" notifications use this action to raise the window and select the tab.
-    public void focus_terminal_tab (string terminal_id) {
+    private void focus_terminal_tab (string terminal_id) {
         if (bus == null) {
             return;
         }
