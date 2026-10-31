@@ -68,6 +68,7 @@ void main (string[] args) {
         string[] statuses = {
             """{"rate_limits": {"five_hour": {"used_percentage": 85, "resets_at": 4102444800}, "seven_day": {"used_percentage": 50}}}""",
             """{"rate_limits": {"five_hour": {"used_percentage": 90, "resets_at": 4102444800}, "seven_day": {"used_percentage": 81}}}""",
+            """{"rate_limits": {"five_hour": {"used_percentage": 40, "resets_at": 4102462800}}}""",
             """{"rate_limits": {"five_hour": {"used_percentage": 82, "resets_at": 4102462800}}}""",
         };
         foreach (var status in statuses) {
