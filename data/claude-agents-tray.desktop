@@ -9,3 +9,8 @@ Categories=Development;Utility;
 # Pantheon gets the Wingpanel indicator instead.
 NotShowIn=Pantheon;
 X-GNOME-Autostart-enabled=true
+Actions=jump;
+
+[Desktop Action jump]
+Name=Go to Waiting Session
+Exec=claude-agents-tray --jump

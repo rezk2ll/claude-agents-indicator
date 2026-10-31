@@ -93,6 +93,7 @@ walk(json.load(sys.stdin))"
     host=$!
     sleep 1
     claude-agents-tray > "$WORK/tray.log" 2>&1 &
+    tray=$!
     wait $host
     sleep 1
     grep -q "Clicked: True" "$WORK/host.out" || { cat "$WORK/host.out"; echo "FAIL: session not in the menu"; exit 1; }
@@ -113,6 +114,17 @@ walk(json.load(sys.stdin))"
     focused=$(focus_pid)
     [ "$focused" = "$session_terminal" ] || { cat "$WORK/tray.log"; echo "FAIL: --jump focused $focused"; exit 1; }
     echo "PASS: $1 --jump raised the session terminal"
+
+    # With no tray running, --jump starts one, which jumps once it has the sessions.
+    kill $tray
+    wait $tray || true
+    focus_other "$other_terminal"
+    sleep 1
+    claude-agents-tray --jump > "$WORK/tray.log" 2>&1 &
+    sleep 5
+    focused=$(focus_pid)
+    [ "$focused" = "$session_terminal" ] || { cat "$WORK/tray.log"; echo "FAIL: cold --jump focused $focused"; exit 1; }
+    echo "PASS: $1 --jump started the tray and raised the session terminal"
     [ "$1" = kwin ] || exit 0
 
     # A session with no window: KWin reports the miss and the tray opens the agent view instead.
