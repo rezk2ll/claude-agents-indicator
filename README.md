@@ -91,13 +91,17 @@ sudo dnf install ~/rpmbuild/RPMS/*/claude-agents-tray-*.rpm
 
 The Wingpanel indicator raises the right tab in elementary Terminal.
 
-The tray app raises the right tab when the session runs inside:
+The tray app selects the right tab when the session runs inside:
 
 - tmux
 - kitty, with `allow_remote_control yes` and `listen_on` set in `kitty.conf`
 - WezTerm
+- Ghostty 1.4 or later
+- Konsole
 
-In other terminals, clicking the session opens the agent view instead. Background sessions open in your default terminal (`xdg-terminal-exec`, or `x-terminal-emulator` on Debian and Ubuntu).
+It also brings the session's terminal window to the front on Sway, Hyprland, niri and KDE Plasma, and on X11 desktops when `xdotool` is installed. GNOME on Wayland lets no app raise another app's window, so there the tab is selected but the window stays where it is.
+
+When none of this applies, clicking the session opens the agent view instead. Background sessions open in your default terminal (`xdg-terminal-exec`, or `x-terminal-emulator` on Debian and Ubuntu).
 
 ## Requirements
 
@@ -139,7 +143,7 @@ flowchart LR
 
 - Sessions come from `claude agents --json`, polled every 3 seconds.
 - Titles and last prompts are read from the session transcripts in `~/.claude/projects`.
-- Each front end finds a session's tab from the variables its terminal exported to the session's process: `PANTHEON_TERMINAL_ID`, `TMUX_PANE`, `KITTY_WINDOW_ID` or `WEZTERM_PANE`.
+- Each front end finds a session's tab from the variables its terminal exported to the session's process: `PANTHEON_TERMINAL_ID`, `TMUX_PANE`, `KITTY_WINDOW_ID`, `WEZTERM_PANE`, `GHOSTTY_SURFACE_ID` or `KONSOLE_DBUS_SESSION`. The tray app finds the window by walking up from the session's process to the terminal that owns it.
 - Usage comes from the `rate_limits` field Claude Code passes to the status line. cctop saves it under `~/.cctop/status`.
 
 ## License

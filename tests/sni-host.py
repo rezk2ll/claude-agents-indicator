@@ -41,8 +41,28 @@ def dump():
     layout = bus.call_sync(service, menu, "com.canonical.dbusmenu", "GetLayout",
                            GLib.Variant("(iias)", (0, -1, [])), None, 0, 2000, None).unpack()[1]
     print("\n".join(labels(layout)))
+    # An optional second argument clicks the first entry whose label starts with it, as a tray host would.
+    if len(sys.argv) > 2:
+        target = find(layout, sys.argv[2])
+        print("Clicked:", target is not None)
+        if target is not None:
+            bus.call_sync(service, menu, "com.canonical.dbusmenu", "Event",
+                          GLib.Variant("(isvu)", (target, "clicked", GLib.Variant("i", 0), 0)), None, 0, 2000, None)
+        GLib.timeout_add_seconds(2, loop.quit)
+        return False
     loop.quit()
     return False
+
+
+def find(layout, prefix):
+    item_id, props, children = layout
+    if props.get("label", "").startswith(prefix):
+        return item_id
+    for child in children:
+        found = find(child.unpack() if hasattr(child, "unpack") else child, prefix)
+        if found is not None:
+            return found
+    return None
 
 
 def on_call(conn, sender, path, iface, method, params, invocation):

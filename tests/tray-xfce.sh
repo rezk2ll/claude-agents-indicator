@@ -6,7 +6,7 @@ set -euo pipefail
 out=$(realpath "$1")
 tests=$(dirname "$(realpath "$0")")
 work=$(mktemp -d)
-trap 'kill $(jobs -p) 2>/dev/null; rm -rf "$work"' EXIT
+trap 'kill $(jobs -p) 2>/dev/null || true; rm -rf "$work"' EXIT
 mkdir -p "$out" "$work/.claude/projects/-home-me-acme-api" "$work/.claude/projects/-home-me-docs-site" "$work/.cctop/status"
 echo '{"type":"ai-title","aiTitle":"Fix the flaky login test"}' > "$work/.claude/projects/-home-me-acme-api/s-1.jsonl"
 echo '{"type":"ai-title","aiTitle":"Write the install guide"}' > "$work/.claude/projects/-home-me-docs-site/s-3.jsonl"

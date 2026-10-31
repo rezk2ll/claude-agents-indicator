@@ -1,5 +1,8 @@
 #!/bin/sh
-# Stands in for `claude agents --json` in the tray tests.
+# Stands in for `claude agents --json` in the tray tests. FAKE_AGENTS_JSON points at other output.
+if [ -n "$FAKE_AGENTS_JSON" ]; then
+    exec cat "$FAKE_AGENTS_JSON"
+fi
 cat <<'JSON'
 [
  {"id":"a1","sessionId":"s-1","cwd":"/home/me/acme-api","kind":"interactive","status":"waiting","pid":0},
