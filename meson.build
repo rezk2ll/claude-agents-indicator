@@ -19,6 +19,7 @@ core = static_library(
     'src/core/Preferences.vala',
     'src/core/Session.vala',
     'src/core/SessionMonitor.vala',
+    'src/core/Summary.vala',
     'src/core/TerminalFocus.vala',
     'src/core/Usage.vala',
     'src/core/Windows.vala',
@@ -69,6 +70,8 @@ if appindicator_dep.found()
         dependencies: [core_dep, dependency('gtk+-3.0'), appindicator_dep],
         install: true,
     )
+    # Ships with the tray app: waybar and other status bars sit on the same desktops.
+    executable('claude-agents-status', 'src/cli/Status.vala', dependencies: core_dep, install: true)
     install_data('data/claude-agents-tray.desktop', install_dir: get_option('datadir') / 'applications')
     install_data('data/claude-agents-tray.desktop', install_dir: get_option('sysconfdir') / 'xdg' / 'autostart')
     install_data(

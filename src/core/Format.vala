@@ -29,4 +29,20 @@ namespace ClaudeAgents.Format {
         }
         return "%lldm".printf (minutes);
     }
+
+    public string session (Session session) {
+        // A session with no conversation title yet is titled after its project; say it once.
+        var text = session.title == session.project ? session.title : "%s · %s".printf (session.title, session.project);
+        if (session.waiting_for != null) {
+            text = "%s · %s".printf (text, session.waiting_for);
+        }
+        var ago = age (session.last_activity);
+        return ago != "" ? "%s · %s".printf (text, ago) : text;
+    }
+
+    public string usage (string name, double used, int64 resets_at) {
+        var line = "%s %.0f%%".printf (name, Usage.current (used, resets_at));
+        var remaining = until (resets_at);
+        return remaining != null ? "%s · resets in %s".printf (line, remaining) : line;
+    }
 }

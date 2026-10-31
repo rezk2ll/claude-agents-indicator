@@ -77,13 +77,13 @@ public class ClaudeAgents.Tray : Object {
                     entries.add (new Entry (category.to_title ()));
                     first = false;
                 }
-                entries.add (new Entry (describe (session), session));
+                entries.add (new Entry (Format.session (session), session));
             }
         }
         if (monitor.usage.available) {
             entries.add (new Entry (null));
-            entries.add (new Entry (usage_line ("5-hour", monitor.usage.five_hour, monitor.usage.five_hour_resets_at)));
-            entries.add (new Entry (usage_line ("Weekly", monitor.usage.seven_day, monitor.usage.seven_day_resets_at)));
+            entries.add (new Entry (Format.usage ("5-hour", monitor.usage.five_hour, monitor.usage.five_hour_resets_at)));
+            entries.add (new Entry (Format.usage ("Weekly", monitor.usage.seven_day, monitor.usage.seven_day_resets_at)));
         }
         return entries;
     }
@@ -129,22 +129,6 @@ public class ClaudeAgents.Tray : Object {
         if (old != null) {
             old.destroy ();
         }
-    }
-
-    private static string describe (Session session) {
-        // A session with no conversation title yet is titled after its project; say it once.
-        var text = session.title == session.project ? session.title : "%s · %s".printf (session.title, session.project);
-        if (session.waiting_for != null) {
-            text = "%s · %s".printf (text, session.waiting_for);
-        }
-        var age = Format.age (session.last_activity);
-        return age != "" ? "%s · %s".printf (text, age) : text;
-    }
-
-    private static string usage_line (string name, double used, int64 resets_at) {
-        var line = "%s %.0f%%".printf (name, Usage.current (used, resets_at));
-        var remaining = Format.until (resets_at);
-        return remaining != null ? "%s · resets in %s".printf (line, remaining) : line;
     }
 }
 

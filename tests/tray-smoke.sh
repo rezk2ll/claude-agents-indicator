@@ -33,4 +33,13 @@ expect "Needs You"
 expect "acme-api · permission prompt"
 expect "nightly fix · acme-web"
 expect "Open Agent View"
+
+# claude-agents-status is built and installed next to the tray app.
+status=$(dirname "$tray")/claude-agents-status
+[ "$(PATH="$tests/fake:$PATH" HOME="$work/home" "$status")" = "1 need you · 1 your turn · 1 working" ] || { echo "FAIL: claude-agents-status"; exit 1; }
+PATH="$tests/fake:$PATH" HOME="$work/home" "$status" --waybar | python3 -c '
+import json, sys
+out = json.load(sys.stdin)
+assert out["text"] == "1" and out["class"] == "attention", out
+assert "acme-api · permission prompt" in out["tooltip"], out'
 echo PASS
