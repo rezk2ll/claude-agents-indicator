@@ -31,7 +31,7 @@ Unofficial. Not affiliated with Anthropic.
 - Every live session in one list, interactive tabs and background agents alike, grouped into Needs You, Your Turn and Working.
 - Each entry shows the conversation title, the project, and how long the session has been waiting.
 - When a session needs you, the icon gets a badge and a notification pops up. It closes itself once you answer.
-- Click a session, or its notification, to jump to its tab. Background sessions open in a new terminal with `claude attach`.
+- Click a session, or its notification, to jump to its tab and bring its window to the front. Background sessions open in a new terminal with `claude attach`.
 - A keyboard shortcut for the session that needs you: `claude-agents-tray --jump` (see [Jumping to a session](#jumping-to-a-session)).
 - `claude-agents-status` for waybar, polybar, i3blocks or tmux (see [Status bars](#status-bars)).
 - 5-hour and weekly usage with their reset times, read from your status line (see [Usage limits](#usage-limits)), and a notification when either reaches 80%.
@@ -107,7 +107,7 @@ It also brings the session's terminal window to the front on Sway, Hyprland, nir
 gnome-extensions enable claude-agents@rezk2ll.github.io
 ```
 
-Without it, the tab is still selected but the window stays where it is.
+Without it, the tab is still selected but the window stays where it is, and the tray sends a notification with the command above.
 
 When none of this applies, clicking the session opens the agent view instead. Background sessions open in your default terminal (`xdg-terminal-exec`, or `x-terminal-emulator` on Debian and Ubuntu).
 
@@ -158,7 +158,7 @@ Style `#custom-claude.attention` to make it stand out. The plain form fits polyb
 - For the tray app: a tray that speaks StatusNotifierItem, and libayatana-appindicator3.
 - Optional: a status line set up as in [Usage limits](#usage-limits).
 
-The indicator is tested on elementary OS 8. The tray app is built on Ubuntu, Debian, Fedora and Arch in CI and checked against a simulated tray host there.
+The indicator is tested on elementary OS 8. CI builds the tray app on Ubuntu, Debian, Fedora and Arch, opens its menu in a real XFCE panel, and checks that a click raises the session's window on X11, Sway, KDE Plasma and GNOME.
 
 ## Build from source
 

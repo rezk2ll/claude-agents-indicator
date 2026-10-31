@@ -32,6 +32,8 @@ You don't need the desktop you're changing it for. `tests/tray-smoke.sh build/cl
 
 `tests/tray-xfce.sh OUTPUT_DIR` goes one step further: it runs the installed tray app inside a real XFCE panel on Xvfb, opens the menu and saves screenshots. CI runs it in an Ubuntu container and attaches the screenshots to the run.
 
+`tests/tray-raise.sh x11|sway|kwin|gnome` starts a headless compositor, opens two terminals, clicks the session in the menu and checks that its terminal came to the front. The script header lists what each mode needs.
+
 To check the Debian package the way CI does:
 
 ```sh
@@ -47,7 +49,7 @@ dpkg-buildpackage -b -us -uc
 
 ## Pull requests
 
-- CI builds the `.deb` packages in an elementary OS 8 container and installs them, and builds the tray app on Ubuntu, Debian, Fedora and Arch and runs the smoke test. It must pass.
+- CI builds the `.deb` packages in an elementary OS 8 container and installs them, builds the tray app on Ubuntu, Debian, Fedora and Arch, and runs the smoke, XFCE and raise tests. It must pass.
 - For a visible change, attach a screenshot.
 - Say which distro, desktop and terminal you tried it on.
 

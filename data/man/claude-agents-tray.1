@@ -13,8 +13,12 @@ when available. The icon switches to its attention state, and the label shows
 the count, while a session needs you.
 .PP
 Clicking a session selects its tab in tmux, kitty, WezTerm, Ghostty or Konsole,
-and raises its window on Sway, Hyprland, niri, KDE Plasma and X11. Otherwise it
-opens the agent view. Only one tray runs per session; a second launch exits.
+and raises its window on Sway, Hyprland, niri, KDE Plasma and X11, and on GNOME
+with the Claude Agents shell extension turned on. Otherwise it opens the agent
+view. Only one tray runs per session; a second launch exits.
+.PP
+It also sends a notification when a session needs you, when one finishes, and
+when the 5-hour or weekly usage reaches 80%.
 .SH OPTIONS
 .TP
 .B \-\-jump
