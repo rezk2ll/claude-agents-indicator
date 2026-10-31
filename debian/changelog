@@ -10,8 +10,10 @@ claude-agents-indicator (0.3.0) noble; urgency=medium
   * New claude-agents-status command for waybar, polybar, i3blocks and tmux,
     once or with --follow.
   * claude-agents-tray --jump goes to the session that needs you, for a
-    keyboard shortcut.
+    keyboard shortcut, and is offered as a launcher action.
   * On KDE, a session with no window opens the agent view.
+  * A GNOME Shell extension raises the session's window on GNOME Wayland.
+  * Man pages for claude-agents-tray and claude-agents-status.
 
  -- rezk2ll <6764881+rezk2ll@users.noreply.github.com>  Sat, 31 Oct 2026 18:00:00 +0100
 
