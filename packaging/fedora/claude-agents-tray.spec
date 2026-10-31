@@ -1,5 +1,5 @@
 Name:           claude-agents-tray
-Version:        0.2.1
+Version:        0.3.0
 Release:        1%{?dist}
 Summary:        Claude Code sessions in the system tray
 License:        GPL-3.0-or-later
