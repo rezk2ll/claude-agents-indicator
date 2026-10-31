@@ -27,14 +27,17 @@ Unofficial. Not affiliated with Anthropic.
 
 ## Install
 
-Download the `.deb` from the [latest release](https://github.com/rezk2ll/claude-agents-indicator/releases/latest), then:
+From the [PPA](https://launchpad.net/~k2ll33d2/+archive/ubuntu/claude-agents-indicator), which keeps it updated with your system updates:
 
 ```sh
-sudo apt install ./claude-agents-indicator_*.deb
+sudo add-apt-repository ppa:k2ll33d2/claude-agents-indicator
+sudo apt install claude-agents-indicator
 killall io.elementary.wingpanel
 ```
 
 The panel comes back on its own.
+
+Or download the `.deb` from the [latest release](https://github.com/rezk2ll/claude-agents-indicator/releases/latest) and install it with `sudo apt install ./claude-agents-indicator_*.deb`.
 
 ## Build from source
 
