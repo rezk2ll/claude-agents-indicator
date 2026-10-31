@@ -33,7 +33,9 @@ export default class ClaudeAgentsExtension extends Extension {
         for (const pid of pids) {
             const match = windows.find(window => window.get_pid() === pid);
             if (match) {
-                Main.activateWindow(match);
+                // A D-Bus call has no input event, so the shell's current time is the last event's, which Mutter
+                // may count as older than the focused window's and refuse. A round trip gives a fresh one.
+                Main.activateWindow(match, global.display.get_current_time_roundtrip());
                 return true;
             }
         }
