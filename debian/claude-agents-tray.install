@@ -1,5 +1,7 @@
 usr/bin/claude-agents-tray
 usr/bin/claude-agents-status
+usr/share/man/man1/claude-agents-tray.1
+usr/share/man/man1/claude-agents-status.1
 usr/share/applications
 usr/share/icons
 etc/xdg/autostart
