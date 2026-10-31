@@ -6,6 +6,7 @@ Exec=claude-agents-tray
 Icon=claude-agents-tray
 Terminal=false
 Categories=Development;Utility;
+Keywords=claude;agent;ai;session;tray;
 # Pantheon gets the Wingpanel indicator instead.
 NotShowIn=Pantheon;
 X-GNOME-Autostart-enabled=true
