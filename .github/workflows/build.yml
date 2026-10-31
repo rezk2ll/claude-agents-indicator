@@ -159,7 +159,7 @@ jobs:
     container: archlinux:latest
     steps:
       - name: Install packaging and test tools
-        run: pacman -Syu --noconfirm --needed base-devel git python-gobject xorg-server-xvfb
+        run: pacman -Syu --noconfirm --needed base-devel git python-gobject xorg-server-xvfb kwin foot ttf-dejavu
 
       - uses: actions/checkout@v7
         with:
@@ -181,3 +181,6 @@ jobs:
 
       - name: Smoke test the installed app
         run: tests/tray-smoke.sh /usr/bin/claude-agents-tray
+
+      - name: Raise a session's terminal on KWin
+        run: tests/tray-raise.sh kwin

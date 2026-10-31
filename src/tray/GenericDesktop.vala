@@ -124,15 +124,10 @@ public class ClaudeAgents.GenericDesktop : Object, Desktop {
             FileUtils.set_contents (path, Windows.kwin_script (candidates));
             var bus = Bus.get_sync (BusType.SESSION);
             kwin_call (bus, "/Scripting", "org.kde.kwin.Scripting", "unloadScript", new Variant ("(s)", KWIN_PLUGIN));
-            var reply = kwin_call (bus, "/Scripting", "org.kde.kwin.Scripting", "loadScript", new Variant ("(ss)", path, KWIN_PLUGIN));
-            int id;
-            reply.get ("(i)", out id);
-            // Plasma 6 puts loaded scripts under /Scripting, Plasma 5 at the root.
-            try {
-                kwin_call (bus, "/Scripting/Script%d".printf (id), "org.kde.kwin.Script", "run", null);
-            } catch (Error e) {
-                kwin_call (bus, "/%d".printf (id), "org.kde.kwin.Script", "run", null);
-            }
+            kwin_call (bus, "/Scripting", "org.kde.kwin.Scripting", "loadScript", new Variant ("(ss)", path, KWIN_PLUGIN));
+            // start runs every loaded script that is not running yet. The id loadScript returns is no use: KWin 6
+            // numbers a script by how many are loaded, so after an unload its path can be another script's.
+            kwin_call (bus, "/Scripting", "org.kde.kwin.Scripting", "start", null);
             return true;
         } catch (Error e) {
             warning ("Cannot raise the window through KWin: %s", e.message);
