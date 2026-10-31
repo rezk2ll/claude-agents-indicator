@@ -46,7 +46,7 @@ public class ClaudeAgents.UsageWidget : Gtk.Grid {
         var current = Usage.current (used, resets_at);
         bar.value = (current / 100).clamp (0, 1);
         value.label = "%.0f%%".printf (current);
-        var remaining = format_reset (resets_at);
+        var remaining = Format.until (resets_at);
         reset.label = remaining != null ? "↻ " + remaining : "";
         reset.tooltip_text = remaining != null ? "Resets in %s".printf (remaining) : null;
     }
@@ -82,21 +82,5 @@ public class ClaudeAgents.UsageWidget : Gtk.Grid {
         label.get_style_context ().add_class (Gtk.STYLE_CLASS_DIM_LABEL);
         label.get_style_context ().add_class ("claude-time");
         return label;
-    }
-
-    private static string? format_reset (int64 resets_at) {
-        var seconds = resets_at - get_real_time () / 1000000;
-        if (resets_at <= 0 || seconds <= 0) {
-            return null;
-        }
-        var days = seconds / 86400;
-        var hours = (seconds % 86400) / 3600;
-        var minutes = (seconds % 3600) / 60;
-        if (days > 0) {
-            return "%lldd %lldh".printf (days, hours);
-        } else if (hours > 0) {
-            return "%lldh %lldm".printf (hours, minutes);
-        }
-        return "%lldm".printf (minutes);
     }
 }

@@ -9,7 +9,8 @@ Build-Depends: debhelper-compat (= 13),
                libgee-0.8-dev,
                libgtk-3-dev,
                libjson-glib-dev,
-               libwingpanel-dev
+               libwingpanel-dev,
+               libayatana-appindicator3-dev
 Standards-Version: 4.6.2
 Homepage: https://github.com/rezk2ll/claude-agents-indicator
 Rules-Requires-Root: no
@@ -17,7 +18,16 @@ Rules-Requires-Root: no
 Package: claude-agents-indicator
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}, wingpanel
-Description: Wingpanel indicator for Claude Code sessions
- Lists live Claude Code sessions in the elementary OS panel, badges the
- panel and dock while a session waits on you, sends notifications, and
- jumps to the session's Terminal tab on click.
+Description: Claude Code sessions in the elementary OS panel
+ Lists live Claude Code sessions in the Wingpanel, badges the panel and
+ dock while a session waits on you, sends notifications, and jumps to the
+ session's Terminal tab on click.
+
+Package: claude-agents-tray
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: Claude Code sessions in the system tray
+ Lists live Claude Code sessions in a tray menu on any desktop with
+ StatusNotifierItem support (KDE Plasma, Ubuntu's GNOME, XFCE, Cinnamon,
+ MATE, Budgie, waybar), shows usage, sends notifications, and jumps to the
+ session's tab in tmux, kitty or WezTerm.

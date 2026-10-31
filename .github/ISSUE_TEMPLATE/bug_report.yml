@@ -1,5 +1,5 @@
 name: Bug report
-description: Something in the indicator does not work
+description: Something in the indicator or the tray app does not work
 labels: [bug]
 body:
   - type: textarea
@@ -9,20 +9,34 @@ body:
       description: What you did, what you expected, and what you saw instead. A screenshot helps.
     validations:
       required: true
+  - type: dropdown
+    id: frontend
+    attributes:
+      label: Which one
+      options:
+        - Wingpanel indicator
+        - Tray app
+    validations:
+      required: true
   - type: input
     id: version
     attributes:
-      label: Indicator version
-      description: "Output of `dpkg -s claude-agents-indicator | grep Version`"
+      label: Version
+      description: "Output of `dpkg -s claude-agents-indicator claude-agents-tray | grep Version`"
     validations:
       required: true
   - type: input
     id: os
     attributes:
-      label: OS
-      description: "e.g. elementary OS 8.0, or your distro running Pantheon"
+      label: OS and desktop
+      description: "e.g. elementary OS 8.0, Kubuntu 24.04 with Plasma 6, Fedora 41 with GNOME"
     validations:
       required: true
+  - type: input
+    id: terminal
+    attributes:
+      label: Terminal
+      description: "e.g. elementary Terminal, kitty, tmux inside GNOME Terminal"
   - type: input
     id: claude
     attributes:
@@ -31,6 +45,6 @@ body:
   - type: textarea
     id: log
     attributes:
-      label: Panel log
-      description: "Run `killall io.elementary.wingpanel; G_MESSAGES_DEBUG=all io.elementary.wingpanel`, reproduce the bug, and paste the lines that mention the indicator."
+      label: Log
+      description: "Indicator: run `killall io.elementary.wingpanel; G_MESSAGES_DEBUG=all io.elementary.wingpanel`. Tray app: run `killall claude-agents-tray; G_MESSAGES_DEBUG=all claude-agents-tray`. Reproduce the bug and paste what it prints."
       render: text

@@ -57,6 +57,29 @@ void main (string[] args) {
         assert (session.environ ("NOT_SET_ANYWHERE") == null);
     });
 
+    Test.add_func ("/terminal-focus/command", () => {
+        var env = new HashTable<string, string> (str_hash, str_equal);
+        assert (TerminalFocus.command ((name) => env.lookup (name)) == null);
+
+        env.insert ("TMUX", "/tmp/tmux-1000/default,4242,0");
+        env.insert ("TMUX_PANE", "%3");
+        var tmux = string.joinv (" ", TerminalFocus.command ((name) => env.lookup (name)));
+        assert (tmux == "tmux -S /tmp/tmux-1000/default select-window -t %3 ; select-pane -t %3 ; switch-client -t %3");
+
+        env.remove_all ();
+        env.insert ("KITTY_WINDOW_ID", "7");
+        // kitty without remote control enabled exports no socket, so it cannot be driven.
+        assert (TerminalFocus.command ((name) => env.lookup (name)) == null);
+        env.insert ("KITTY_LISTEN_ON", "unix:/tmp/kitty");
+        var kitty = string.joinv (" ", TerminalFocus.command ((name) => env.lookup (name)));
+        assert (kitty == "kitty @ --to unix:/tmp/kitty focus-window --match id:7");
+
+        env.remove_all ();
+        env.insert ("WEZTERM_PANE", "12");
+        var wezterm = string.joinv (" ", TerminalFocus.command ((name) => env.lookup (name)));
+        assert (wezterm == "wezterm cli activate-pane --pane-id 12");
+    });
+
     Test.add_func ("/monitor/apply", () => {
         var desktop = new FakeDesktop ();
         var monitor = new SessionMonitor (desktop);
