@@ -91,6 +91,14 @@ walk(json.load(sys.stdin))"
                     | sed -n "s/^(true, .\(.*\).)$/\1/p"
             }
             for _ in $(seq 60); do [ -n "$(shell_eval 1 2>/dev/null)" ] && break; sleep 0.5; done
+            # Extensions load after the shell answers Eval.
+            for _ in $(seq 60); do
+                gdbus introspect --session --dest io.github.rezk2ll.ClaudeAgents.Shell \
+                    --object-path /io/github/rezk2ll/ClaudeAgents/Shell >/dev/null 2>&1 && break
+                sleep 0.5
+            done
+            gdbus introspect --session --dest io.github.rezk2ll.ClaudeAgents.Shell --object-path /io/github/rezk2ll/ClaudeAgents/Shell \
+                >/dev/null || { grep -i -A3 "claude-agents\|JS ERROR" "$WORK/gnome-shell.log"; echo "FAIL: the extension did not load"; exit 1; }
             export WAYLAND_DISPLAY=wayland-0
             terminal() { foot "$@" >/dev/null 2>&1 & }
             focus_pid() { shell_eval "global.display.focus_window ? global.display.focus_window.get_pid () : 0"; }
@@ -125,7 +133,7 @@ walk(json.load(sys.stdin))"
     if [ "$focused" != "$session_terminal" ]; then
         echo "FAIL: focused pid $focused, expected the session terminal $session_terminal"
         cat "$WORK/tray.log"
-        tail -20 "$WORK/kwin.log" 2>/dev/null || true
+        tail -20 "$WORK/kwin.log" "$WORK/gnome-shell.log" 2>/dev/null || true
         exit 1
     fi
 
