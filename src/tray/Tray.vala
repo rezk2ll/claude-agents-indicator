@@ -22,7 +22,6 @@ public class ClaudeAgents.Tray : Object {
         indicator = new AppIndicator.Indicator (
             "claude-agents-tray", "claude-agents-tray", AppIndicator.IndicatorCategory.APPLICATION_STATUS
         );
-        indicator.set_title ("Claude Agents");
         indicator.set_attention_icon_full ("claude-agents-tray-attention", "A session needs you");
 
         agents.monitor.changed.connect (update);
@@ -35,9 +34,19 @@ public class ClaudeAgents.Tray : Object {
         if (waiting != shown_waiting) {
             shown_waiting = waiting;
             indicator.set_status (waiting > 0 ? AppIndicator.IndicatorStatus.ATTENTION : AppIndicator.IndicatorStatus.ACTIVE);
-            // Hosts that draw labels show the count beside the icon. The title stays fixed: changing it once the item
-            // is registered makes libayatana-appindicator abort when a host reads it (seen on Ubuntu 24.04).
-            indicator.set_label (waiting > 0 ? waiting.to_string () : "", "99");
+            // Plain ifs: valac 0.56 frees the string of a nested `?:` that mixes literals and allocated strings
+            // before the call reads it.
+            string label = "";
+            string title = "Claude Agents";
+            if (waiting == 1) {
+                label = "1";
+                title = "1 session needs you";
+            } else if (waiting > 1) {
+                label = waiting.to_string ();
+                title = "%d sessions need you".printf (waiting);
+            }
+            indicator.set_label (label, "99");
+            indicator.set_title (title);
         }
 
         var entries = list_entries ();
