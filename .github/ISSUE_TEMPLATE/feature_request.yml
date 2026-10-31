@@ -1,0 +1,11 @@
+name: Feature request
+description: Suggest something the indicator could do
+labels: [enhancement]
+body:
+  - type: textarea
+    id: why
+    attributes:
+      label: What you want to do
+      description: The situation you are in and what would help. Describe the need before the solution.
+    validations:
+      required: true

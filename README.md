@@ -1,33 +1,37 @@
+<div align="center">
+
+<img src="docs/logo.svg" width="96" height="96" alt="">
+
 # Claude Agents Indicator
 
-![elementary OS 8](https://img.shields.io/badge/elementary%20OS-8-64baff?logo=elementary&logoColor=white)
-![Pantheon](https://img.shields.io/badge/desktop-Pantheon-3689e6)
-[![Build](https://github.com/rezk2ll/claude-agents-indicator/actions/workflows/build.yml/badge.svg)](https://github.com/rezk2ll/claude-agents-indicator/actions/workflows/build.yml)
+See which Claude Code session is waiting on you, from the elementary OS panel.
 
-A Wingpanel indicator for elementary OS that tracks your Claude Code sessions. When a session is waiting on you, you see it in the panel instead of finding out ten minutes later in some background tab.
+[![elementary OS 8](https://img.shields.io/badge/elementary%20OS-8-64baff?logo=elementary&logoColor=white)](https://elementary.io)
+[![Pantheon](https://img.shields.io/badge/desktop-Pantheon-3689e6)](https://github.com/elementary)
+[![PPA](https://img.shields.io/badge/PPA-k2ll33d2-e95420?logo=ubuntu&logoColor=white)](https://launchpad.net/~k2ll33d2/+archive/ubuntu/claude-agents-indicator)
+[![Release](https://img.shields.io/github/v/release/rezk2ll/claude-agents-indicator)](https://github.com/rezk2ll/claude-agents-indicator/releases/latest)
+[![Build](https://github.com/rezk2ll/claude-agents-indicator/actions/workflows/build.yml/badge.svg)](https://github.com/rezk2ll/claude-agents-indicator/actions/workflows/build.yml)
+[![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue)](LICENSE)
 
 ![Screenshot](docs/screenshot.png)
 
+</div>
+
+A Wingpanel indicator that lists your live Claude Code sessions and tells you when one is waiting on you. You find out right away, not ten minutes later in some background tab.
+
 Unofficial. Not affiliated with Anthropic.
 
-## What it does
+## Features
 
-- Lists every live Claude Code session, interactive tabs and background agents alike, grouped into Needs You, Your Turn and Working.
-- Shows each session's conversation title, project, and how long it has been waiting.
-- Badges the panel icon and the Terminal icon in the dock while a session needs you.
-- Sends a notification when a session needs you or finishes, and closes it once you answer.
-- Clicking a session (or its notification) jumps to its Terminal tab. Background sessions open in a new window with `claude attach`.
-- Shows your 5-hour and weekly usage with reset times, if cctop is installed.
-
-## Requirements
-
-- elementary OS 8, or another distro running the Pantheon desktop (Wingpanel, Gala, elementary Terminal). Only elementary OS 8 is tested.
-- Claude Code with agent view (`claude agents --json`)
-- Optional: [cctop](https://github.com/tomstagl/cctop) as your status line, for the usage bars
+- Every live session in one list, interactive tabs and background agents alike, grouped into Needs You, Your Turn and Working.
+- Each row shows the conversation title, the project, and how long the session has been waiting.
+- When a session needs you, the panel icon and the Terminal icon in the dock get a badge, and a notification pops up. It closes itself once you answer.
+- Click a session, or its notification, to jump to its Terminal tab. Background sessions open in a new window with `claude attach`.
+- 5-hour and weekly usage bars with their reset times, if cctop is installed.
 
 ## Install
 
-From the [PPA](https://launchpad.net/~k2ll33d2/+archive/ubuntu/claude-agents-indicator), which keeps it updated with your system updates:
+From the [PPA](https://launchpad.net/~k2ll33d2/+archive/ubuntu/claude-agents-indicator), so updates arrive with your system updates:
 
 ```sh
 sudo add-apt-repository ppa:k2ll33d2/claude-agents-indicator
@@ -35,9 +39,19 @@ sudo apt install claude-agents-indicator
 killall io.elementary.wingpanel
 ```
 
-The panel comes back on its own.
+The panel restarts on its own.
 
-Or download the `.deb` from the [latest release](https://github.com/rezk2ll/claude-agents-indicator/releases/latest) and install it with `sudo apt install ./claude-agents-indicator_*.deb`.
+Or grab the `.deb` from the [latest release](https://github.com/rezk2ll/claude-agents-indicator/releases/latest):
+
+```sh
+sudo apt install ./claude-agents-indicator_*.deb
+```
+
+## Requirements
+
+- elementary OS 8, or another distro running the Pantheon desktop (Wingpanel, Gala, elementary Terminal). Only elementary OS 8 is tested.
+- Claude Code with agent view (`claude agents --json`).
+- Optional: [cctop](https://github.com/tomstagl/cctop) as your status line, for the usage bars.
 
 ## Build from source
 
@@ -58,4 +72,8 @@ killall io.elementary.wingpanel
 
 ## License
 
-GPL-3.0-or-later
+[GPL-3.0-or-later](LICENSE)
+
+## Contributing
+
+Bug reports and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).

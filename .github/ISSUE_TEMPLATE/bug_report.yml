@@ -1,0 +1,36 @@
+name: Bug report
+description: Something in the indicator does not work
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what you saw instead. A screenshot helps.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Indicator version
+      description: "Output of `dpkg -s claude-agents-indicator | grep Version`"
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: OS
+      description: "e.g. elementary OS 8.0, or your distro running Pantheon"
+    validations:
+      required: true
+  - type: input
+    id: claude
+    attributes:
+      label: Claude Code version
+      description: "Output of `claude --version`"
+  - type: textarea
+    id: log
+    attributes:
+      label: Panel log
+      description: "Run `killall io.elementary.wingpanel; G_MESSAGES_DEBUG=all io.elementary.wingpanel`, reproduce the bug, and paste the lines that mention the indicator."
+      render: text
