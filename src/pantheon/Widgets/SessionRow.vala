@@ -105,7 +105,7 @@ public class ClaudeAgents.SessionRow : Gtk.ListBoxRow {
         } else {
             spinner.active = false;
             trailing.visible_child = time_label;
-            time_label.label = format_age (session.last_activity);
+            time_label.label = Format.age (session.last_activity);
         }
         if (category == Category.ATTENTION) {
             time_label.get_style_context ().add_class ("attention");
@@ -132,20 +132,5 @@ public class ClaudeAgents.SessionRow : Gtk.ListBoxRow {
             }
         }
         return result.len > 0 ? result.str : "?";
-    }
-
-    private static string format_age (int64 unix_seconds) {
-        if (unix_seconds <= 0) {
-            return "";
-        }
-        var seconds = get_real_time () / 1000000 - unix_seconds;
-        if (seconds < 60) {
-            return "now";
-        } else if (seconds < 3600) {
-            return "%lldm".printf (seconds / 60);
-        } else if (seconds < 86400) {
-            return "%lldh".printf (seconds / 3600);
-        }
-        return "%lldd".printf (seconds / 86400);
     }
 }

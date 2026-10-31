@@ -14,6 +14,7 @@ core = static_library(
     'claude-agents-core',
     'src/core/Agents.vala',
     'src/core/Desktop.vala',
+    'src/core/Format.vala',
     'src/core/Notifier.vala',
     'src/core/Preferences.vala',
     'src/core/Session.vala',
