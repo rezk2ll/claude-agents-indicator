@@ -113,6 +113,14 @@ walk(json.load(sys.stdin))"
     terminal sleep 600
     other_terminal=$!
     sleep 3
+    # The tray raises the window a moment after the click, later on a busy CI runner.
+    wait_focus() {
+        for _ in $(seq 20); do
+            [ "$(focus_pid)" = "$session_terminal" ] && break
+            sleep 0.5
+        done
+        focus_pid
+    }
     printf "[{\"id\":\"r1\",\"sessionId\":\"s-r\",\"cwd\":\"/home/me/raise-me\",\"kind\":\"interactive\",\"status\":\"waiting\",\"pid\":%s}]" \
         "$(cat "$WORK/session.pid")" > "$WORK/agents.json"
 
@@ -126,10 +134,9 @@ walk(json.load(sys.stdin))"
     claude-agents-tray > "$WORK/tray.log" 2>&1 &
     tray=$!
     wait $host
-    sleep 1
     grep -q "Clicked: True" "$WORK/host.out" || { cat "$WORK/host.out"; echo "FAIL: session not in the menu"; exit 1; }
 
-    focused=$(focus_pid)
+    focused=$(wait_focus)
     if [ "$focused" != "$session_terminal" ]; then
         echo "FAIL: focused pid $focused, expected the session terminal $session_terminal"
         echo "opened instead: $(cat "$WORK/opened" 2>/dev/null || echo nothing)"
@@ -143,8 +150,7 @@ walk(json.load(sys.stdin))"
     focus_other "$other_terminal"
     sleep 1
     claude-agents-tray --jump
-    sleep 1
-    focused=$(focus_pid)
+    focused=$(wait_focus)
     [ "$focused" = "$session_terminal" ] || { cat "$WORK/tray.log"; echo "FAIL: --jump focused $focused"; exit 1; }
     echo "PASS: $1 --jump raised the session terminal"
 
@@ -154,8 +160,8 @@ walk(json.load(sys.stdin))"
     focus_other "$other_terminal"
     sleep 1
     claude-agents-tray --jump > "$WORK/tray.log" 2>&1 &
-    sleep 5
-    focused=$(focus_pid)
+    sleep 2
+    focused=$(wait_focus)
     [ "$focused" = "$session_terminal" ] || { cat "$WORK/tray.log"; echo "FAIL: cold --jump focused $focused"; exit 1; }
     echo "PASS: $1 --jump started the tray and raised the session terminal"
     [ "$1" = kwin ] || exit 0
