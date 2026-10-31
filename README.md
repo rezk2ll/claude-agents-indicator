@@ -32,7 +32,7 @@ Unofficial. Not affiliated with Anthropic.
 - Each entry shows the conversation title, the project, and how long the session has been waiting.
 - When a session needs you, the icon gets a badge and a notification pops up. It closes itself once you answer.
 - Click a session, or its notification, to jump to its tab. Background sessions open in a new terminal with `claude attach`.
-- 5-hour and weekly usage with their reset times, if cctop is installed.
+- 5-hour and weekly usage with their reset times, read from your status line (see [Usage limits](#usage-limits)).
 
 ## Install
 
@@ -103,12 +103,27 @@ It also brings the session's terminal window to the front on Sway, Hyprland, nir
 
 When none of this applies, clicking the session opens the agent view instead. Background sessions open in your default terminal (`xdg-terminal-exec`, or `x-terminal-emulator` on Debian and Ubuntu).
 
+## Usage limits
+
+Claude Code passes your 5-hour and weekly usage to the status line command. If you use [cctop](https://github.com/tomstagl/cctop) as your status line, it already works. Otherwise, save a copy of that input in `~/.claude/settings.json`, in front of your current status line command:
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "tee \"$XDG_RUNTIME_DIR/claude-agents-status.json\" | your-current-command"
+  }
+}
+```
+
+With no status line yet, use `cat > "$XDG_RUNTIME_DIR/claude-agents-status.json"` as the command.
+
 ## Requirements
 
 - Claude Code with agent view (`claude agents --json`).
 - For the indicator: elementary OS 8, or another distro running Pantheon (Wingpanel, Gala, elementary Terminal).
 - For the tray app: a tray that speaks StatusNotifierItem, and libayatana-appindicator3.
-- Optional: [cctop](https://github.com/tomstagl/cctop) as your status line, for usage.
+- Optional: a status line set up as in [Usage limits](#usage-limits).
 
 The indicator is tested on elementary OS 8. The tray app is built on Ubuntu, Debian, Fedora and Arch in CI and checked against a simulated tray host there.
 
@@ -136,7 +151,7 @@ sudo ninja -C build install
 flowchart LR
     claude["claude agents --json"] --> core
     transcripts["~/.claude/projects"] --> core
-    cctop["~/.cctop/status"] --> core
+    statusline["status line input"] --> core
     core["core: sessions, usage, notifications"] --> wingpanel["Wingpanel indicator"]
     core --> tray["tray app"]
 ```
@@ -144,7 +159,7 @@ flowchart LR
 - Sessions come from `claude agents --json`, polled every 3 seconds.
 - Titles and last prompts are read from the session transcripts in `~/.claude/projects`.
 - Each front end finds a session's tab from the variables its terminal exported to the session's process: `PANTHEON_TERMINAL_ID`, `TMUX_PANE`, `KITTY_WINDOW_ID`, `WEZTERM_PANE`, `GHOSTTY_SURFACE_ID` or `KONSOLE_DBUS_SESSION`. The tray app finds the window by walking up from the session's process to the terminal that owns it.
-- Usage comes from the `rate_limits` field Claude Code passes to the status line. cctop saves it under `~/.cctop/status`.
+- Usage comes from the `rate_limits` field Claude Code passes to the status line. The freshest of `$XDG_RUNTIME_DIR/claude-agents-status.json` and cctop's files under `~/.cctop/status` wins.
 
 ## License
 
