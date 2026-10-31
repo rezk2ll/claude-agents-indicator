@@ -5,12 +5,15 @@ public class ClaudeAgents.Usage : Object {
     public int64 seven_day_resets_at { get; private set; }
 
     private string status_dir;
+    private string status_file;
     private string? source_path;
     private int64 source_mtime = -1;
 
     construct {
-        // cctop's status-line shim saves the JSON Claude Code hands to the status line, rate_limits included.
+        // The JSON Claude Code hands to the status line carries rate_limits. cctop's status-line shim saves it per
+        // session; without cctop, the status line command can tee it to one file.
         status_dir = Path.build_filename (Environment.get_home_dir (), ".cctop", "status");
+        status_file = Path.build_filename (Environment.get_user_runtime_dir (), "claude-agents-status.json");
     }
 
     public bool available {
@@ -19,10 +22,10 @@ public class ClaudeAgents.Usage : Object {
         }
     }
 
-    // Reads the freshest status among the live sessions; returns true when the numbers changed.
+    // Reads the freshest status, from the teed file or the live sessions; returns true when the numbers changed.
     public bool refresh (GenericArray<Session> sessions) {
-        string? newest = null;
-        int64 newest_mtime = -1;
+        int64 newest_mtime = modified_time (status_file);
+        string? newest = newest_mtime >= 0 ? status_file : null;
         foreach (var session in sessions) {
             if (session.session_id == "") {
                 continue;
@@ -51,7 +54,7 @@ public class ClaudeAgents.Usage : Object {
         if (root == null || root.get_node_type () != Json.NodeType.OBJECT) {
             return false;
         }
-        var limits = root.get_object ().get_object_member ("rate_limits");
+        var limits = member_object (root.get_object (), "rate_limits");
         if (limits == null) {
             return false;
         }
@@ -71,13 +74,19 @@ public class ClaudeAgents.Usage : Object {
     }
 
     private static double percentage (Json.Object limits, string window) {
-        var obj = limits.get_object_member (window);
+        var obj = member_object (limits, window);
         return obj != null ? obj.get_double_member_with_default ("used_percentage", 0) : 0;
     }
 
     private static int64 resets_at (Json.Object limits, string window) {
-        var obj = limits.get_object_member (window);
+        var obj = member_object (limits, window);
         return obj != null ? obj.get_int_member_with_default ("resets_at", 0) : 0;
+    }
+
+    // Any window may be missing from the status, and get_object_member is critical on a missing member.
+    private static Json.Object? member_object (Json.Object obj, string name) {
+        var node = obj.get_member (name);
+        return node != null && node.get_node_type () == Json.NodeType.OBJECT ? node.get_object () : null;
     }
 
     private static int64 modified_time (string path) {

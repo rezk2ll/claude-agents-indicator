@@ -39,7 +39,22 @@ void main (string[] args) {
     }
     DirUtils.create_with_parents (Path.build_filename (home, ".claude", "projects"), 0755);
     Environment.set_variable ("HOME", home, true);
+    Environment.set_variable ("XDG_RUNTIME_DIR", home, true);
     Test.init (ref args);
+
+    Test.add_func ("/usage/status-file", () => {
+        var usage = new Usage ();
+        assert (!usage.refresh (new GenericArray<Session> ()));
+        var path = Path.build_filename (Environment.get_user_runtime_dir (), "claude-agents-status.json");
+        try {
+            FileUtils.set_contents (path, """{"session_id": "x", "rate_limits": {"five_hour": {"used_percentage": 42.5, "resets_at": 4102444800}}}""");
+        } catch (FileError e) {
+            error (e.message);
+        }
+        assert (usage.refresh (new GenericArray<Session> ()));
+        assert (usage.available && usage.five_hour == 42.5 && usage.five_hour_resets_at == 4102444800);
+        FileUtils.remove (path);
+    });
 
     Test.add_func ("/category/from_status", () => {
         assert (Category.from_status ("waiting") == Category.ATTENTION);
