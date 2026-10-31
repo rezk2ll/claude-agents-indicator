@@ -1,3 +1,9 @@
+claude-agents-indicator (0.2.1) noble; urgency=medium
+
+  * Build-depend on libgee-0.8-dev, which wingpanel.pc requires.
+
+ -- rezk2ll <6764881+rezk2ll@users.noreply.github.com>  Sat, 31 Oct 2026 11:30:00 +0100
+
 claude-agents-indicator (0.2.0) noble; urgency=medium
 
   * Initial release.

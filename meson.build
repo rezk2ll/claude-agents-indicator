@@ -1,4 +1,4 @@
-project('claude-agents-indicator', 'vala', 'c', version: '0.2.0')
+project('claude-agents-indicator', 'vala', 'c', version: '0.2.1')
 
 gnome = import('gnome')
 
