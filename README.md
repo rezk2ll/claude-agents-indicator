@@ -32,6 +32,8 @@ Unofficial. Not affiliated with Anthropic.
 - Each entry shows the conversation title, the project, and how long the session has been waiting.
 - When a session needs you, the icon gets a badge and a notification pops up. It closes itself once you answer.
 - Click a session, or its notification, to jump to its tab. Background sessions open in a new terminal with `claude attach`.
+- A keyboard shortcut for the session that needs you: `claude-agents-tray --jump` (see [Jumping to a session](#jumping-to-a-session)).
+- `claude-agents-status` for waybar, polybar, i3blocks or tmux (see [Status bars](#status-bars)).
 - 5-hour and weekly usage with their reset times, read from your status line (see [Usage limits](#usage-limits)).
 
 ## Install
