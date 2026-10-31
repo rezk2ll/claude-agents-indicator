@@ -20,6 +20,7 @@ public class ClaudeAgents.GenericDesktop : Object, Desktop {
     // arrives late and is ignored.
     private string? kwin_fallback;
     private uint kwin_click = 0;
+    private bool gnome_hint_sent = false;
 
     construct {
         compositor = detect_compositor ();
@@ -176,7 +177,28 @@ public class ClaudeAgents.GenericDesktop : Object, Desktop {
             reply.get ("(b)", out found);
             return found;
         } catch (Error e) {
+            if (e is DBusError.SERVICE_UNKNOWN && !gnome_hint_sent) {
+                gnome_hint_sent = true;
+                suggest_gnome_extension ();
+            }
             return false;
+        }
+    }
+
+    private static void suggest_gnome_extension () {
+        try {
+            Bus.get_sync (BusType.SESSION).call.begin (
+                "org.freedesktop.Notifications", "/org/freedesktop/Notifications", "org.freedesktop.Notifications", "Notify",
+                new Variant.tuple ({
+                    "Claude", new Variant.uint32 (0), "claude-agents-tray", "Turn on the Claude Agents extension",
+                    "GNOME needs it to bring a session's window to the front. Run "
+                    + "gnome-extensions enable claude-agents@rezk2ll.github.io, then log out and back in.",
+                    new Variant.strv ({}), new Variant.array (new VariantType ("{sv}"), {}), new Variant.int32 (-1)
+                }),
+                null, DBusCallFlags.NONE, -1, null
+            );
+        } catch (Error e) {
+            warning ("Cannot suggest the GNOME extension: %s", e.message);
         }
     }
 
