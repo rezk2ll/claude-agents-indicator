@@ -10,8 +10,11 @@ mode=$1
 tests=$(dirname "$(realpath "$0")")
 work=$(mktemp -d)
 trap 'kill $(jobs -p) 2>/dev/null || true; rm -rf "$work"' EXIT
-mkdir -p "$work/home/.claude/projects"
-export PATH="$tests/fake:$PATH" HOME="$work/home" FAKE_AGENTS_JSON="$work/agents.json" WORK="$work" TESTS="$tests"
+mkdir -p "$work/home/.claude/projects" "$work/bin"
+# Records what the tray opens in a terminal instead of opening one.
+printf '#!/bin/sh\necho "$@" > "%s/opened"\n' "$work" > "$work/bin/xdg-terminal-exec"
+chmod +x "$work/bin/xdg-terminal-exec"
+export PATH="$work/bin:$tests/fake:$PATH" HOME="$work/home" FAKE_AGENTS_JSON="$work/agents.json" WORK="$work" TESTS="$tests"
 
 case $mode in
     x11)
@@ -101,5 +104,16 @@ walk(json.load(sys.stdin))"
         tail -20 "$WORK/kwin.log" 2>/dev/null || true
         exit 1
     fi
+    [ "$1" = kwin ] || exit 0
+
+    # A session with no window: KWin reports the miss and the tray opens the agent view instead.
+    sleep 600 &
+    printf "[{\"id\":\"r2\",\"sessionId\":\"s-n\",\"cwd\":\"/home/me/no-window\",\"kind\":\"interactive\",\"status\":\"waiting\",\"pid\":%s}]" \
+        $! > "$WORK/agents.json"
+    python3 "$TESTS/sni-host.py" 8 no-window > "$WORK/host.out" 2>&1
+    sleep 1
+    grep -q "Clicked: True" "$WORK/host.out" || { cat "$WORK/host.out"; echo "FAIL: windowless session not in the menu"; exit 1; }
+    grep -q " agents$" "$WORK/opened" 2>/dev/null || { cat "$WORK/tray.log"; echo "FAIL: the agent view did not open"; exit 1; }
+    echo "PASS: kwin fell back to the agent view"
 ' _ "$mode"
 echo "PASS: $mode raised the session terminal"

@@ -134,9 +134,10 @@ void main (string[] args) {
         assert (Windows.sway_pids ("""{"pid": 8, "nodes": null, "floating_nodes": [3]}""").length == 1);
         assert (Windows.hyprland_pids ("""[1, null, {"pid": 5}]""").length == 1);
 
-        var script = Windows.kwin_script ({ 12, 34 });
+        var script = Windows.kwin_script ({ 12, 34 }, ":1.42");
         assert ("const pids = [12,34];" in script);
         assert ("workspace.activeWindow = match;" in script);
+        assert ("""callDBus (":1.42", "/io/github/rezk2ll/ClaudeAgents",""" in script);
     });
 
     Test.add_func ("/monitor/apply", () => {
