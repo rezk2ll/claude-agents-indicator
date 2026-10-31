@@ -1,0 +1,2 @@
+option('wingpanel', type: 'feature', value: 'auto', description: 'Wingpanel indicator for elementary OS and Pantheon')
+option('tray', type: 'feature', value: 'auto', description: 'Tray app for desktops with StatusNotifierItem support')

@@ -26,36 +26,57 @@ core = static_library(
 )
 core_dep = declare_dependency(link_with: core, dependencies: glib_deps)
 
-wingpanel_dep = dependency('wingpanel')
-indicators_dir = wingpanel_dep.get_variable(
-    'indicatorsdir',
-    pkgconfig_define: ['libdir', get_option('prefix') / get_option('libdir')],
-)
+wingpanel_dep = dependency('wingpanel', required: get_option('wingpanel'))
+if wingpanel_dep.found()
+    indicators_dir = wingpanel_dep.get_variable(
+        'indicatorsdir',
+        pkgconfig_define: ['libdir', get_option('prefix') / get_option('libdir')],
+    )
 
-resources = gnome.compile_resources(
-    'claude-agents-resources',
-    'data/claude-agents.gresource.xml',
-    source_dir: 'data',
-)
+    resources = gnome.compile_resources(
+        'claude-agents-resources',
+        'data/claude-agents.gresource.xml',
+        source_dir: 'data',
+    )
 
-shared_module(
-    meson.project_name(),
-    'src/pantheon/Indicator.vala',
-    'src/pantheon/PantheonDesktop.vala',
-    'src/pantheon/Widgets/UsageWidget.vala',
-    'src/pantheon/Widgets/PanelWidget.vala',
-    'src/pantheon/Widgets/PopoverWidget.vala',
-    'src/pantheon/Widgets/SessionRow.vala',
-    'src/pantheon/Widgets/SwitchModelButton.vala',
-    resources,
-    dependencies: [
-        core_dep,
-        dependency('gtk+-3.0'),
-        wingpanel_dep,
-    ],
-    install: true,
-    install_dir: indicators_dir,
-)
+    shared_module(
+        meson.project_name(),
+        'src/pantheon/Indicator.vala',
+        'src/pantheon/PantheonDesktop.vala',
+        'src/pantheon/Widgets/UsageWidget.vala',
+        'src/pantheon/Widgets/PanelWidget.vala',
+        'src/pantheon/Widgets/PopoverWidget.vala',
+        'src/pantheon/Widgets/SessionRow.vala',
+        'src/pantheon/Widgets/SwitchModelButton.vala',
+        resources,
+        dependencies: [
+            core_dep,
+            dependency('gtk+-3.0'),
+            wingpanel_dep,
+        ],
+        install: true,
+        install_dir: indicators_dir,
+    )
+endif
+
+appindicator_dep = dependency('ayatana-appindicator3-0.1', required: get_option('tray'))
+if appindicator_dep.found()
+    executable(
+        'claude-agents-tray',
+        'src/tray/Tray.vala',
+        'src/tray/GenericDesktop.vala',
+        dependencies: [core_dep, dependency('gtk+-3.0'), appindicator_dep],
+        install: true,
+    )
+    install_data('data/claude-agents-tray.desktop', install_dir: get_option('datadir') / 'applications')
+    install_data('data/claude-agents-tray.desktop', install_dir: get_option('sysconfdir') / 'xdg' / 'autostart')
+    install_data(
+        'data/icons/tray/claude-agents-tray.svg',
+        'data/icons/tray/claude-agents-tray-attention.svg',
+        install_dir: get_option('datadir') / 'icons' / 'hicolor' / 'scalable' / 'apps',
+    )
+    gnome.post_install(gtk_update_icon_cache: true)
+endif
 
 test('core', executable(
     'core-test',

@@ -1,5 +1,4 @@
 namespace ClaudeAgents.Format {
-    // How long ago, in the largest unit: "now", "5m", "3h", "2d".
     public string age (int64 unix_seconds) {
         if (unix_seconds <= 0) {
             return "";
@@ -15,7 +14,6 @@ namespace ClaudeAgents.Format {
         return "%lldd".printf (seconds / 86400);
     }
 
-    // Time left until a reset, in two units ("1h 41m"), or null once it has passed.
     public string? until (int64 resets_at) {
         var seconds = resets_at - get_real_time () / 1000000;
         if (resets_at <= 0 || seconds <= 0) {

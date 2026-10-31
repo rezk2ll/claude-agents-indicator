@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Claude Agents
+Comment=See which Claude Code session is waiting on you
+Exec=claude-agents-tray
+Icon=claude-agents-tray
+Terminal=false
+Categories=Development;Utility;
+# Pantheon gets the Wingpanel indicator instead.
+NotShowIn=Pantheon;
+X-GNOME-Autostart-enabled=true
