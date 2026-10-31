@@ -132,6 +132,8 @@ walk(json.load(sys.stdin))"
     focused=$(focus_pid)
     if [ "$focused" != "$session_terminal" ]; then
         echo "FAIL: focused pid $focused, expected the session terminal $session_terminal"
+        echo "opened instead: $(cat "$WORK/opened" 2>/dev/null || echo nothing)"
+        [ "$1" != gnome ] || echo "window pids: $(shell_eval "global.get_window_actors ().map (a => a.meta_window.get_pid ()).join ()")"
         cat "$WORK/tray.log"
         tail -20 "$WORK/kwin.log" "$WORK/gnome-shell.log" 2>/dev/null || true
         exit 1
