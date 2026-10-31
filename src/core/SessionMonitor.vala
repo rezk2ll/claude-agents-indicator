@@ -77,7 +77,8 @@ public class ClaudeAgents.SessionMonitor : Object {
         changed ();
     }
 
-    private void apply (string json) {
+    // Public so tests can feed `claude agents --json` output without running claude.
+    public void apply (string json) {
         var parser = new Json.Parser ();
         try {
             parser.load_from_data (json);
@@ -121,14 +122,10 @@ public class ClaudeAgents.SessionMonitor : Object {
             session.category = Category.from_status (session.status);
             session.started_at = obj.get_int_member_with_default ("startedAt", 0) / 1000;
 
-            var pid = (int) obj.get_int_member_with_default ("pid", 0);
-            if (pid != session.pid) {
-                session.pid = pid;
-                session.terminal_id = pid > 0 ? read_terminal_id (pid) : null;
-            }
+            session.pid = (int) obj.get_int_member_with_default ("pid", 0);
 
             read_transcript (session);
-            session.window_uid = session.background ? 0 : desktop.find_session_window (session.ai_title);
+            desktop.locate (session);
 
             if (!first_poll && (is_new || previous != session.category)) {
                 transitioned (session, previous, is_new);
@@ -219,27 +216,6 @@ public class ClaudeAgents.SessionMonitor : Object {
             }
         } catch (FileError e) {
             warning ("Cannot scan %s: %s", projects_dir, e.message);
-        }
-        return null;
-    }
-
-    // io.elementary.terminal exports the id of the tab a process runs in; it is what its tab-focus action expects.
-    private static string? read_terminal_id (int pid) {
-        uint8[] environ;
-        try {
-            FileUtils.get_data ("/proc/%d/environ".printf (pid), out environ);
-        } catch (FileError e) {
-            return null;
-        }
-        const string PREFIX = "PANTHEON_TERMINAL_ID=";
-        // Entries are NUL-terminated; the extra NUL guards a truncated last entry.
-        environ += 0;
-        for (int start = 0; start < environ.length - 1;) {
-            unowned string entry = (string) (&environ[start]);
-            if (entry.has_prefix (PREFIX)) {
-                return entry.substring (PREFIX.length);
-            }
-            start += entry.length + 1;
         }
         return null;
     }

@@ -17,6 +17,9 @@ public class ClaudeAgents.Notifier : Object {
 
     public signal void activated (string session_key);
 
+    // The core has no icon theme to look in, so each front end picks the icon.
+    public string app_icon { get; set; default = "utilities-terminal"; }
+
     private NotificationServer? server = null;
     private HashTable<string, uint> ids = new HashTable<string, uint> (str_hash, str_equal);
 
@@ -74,17 +77,12 @@ public class ClaudeAgents.Notifier : Object {
         hints.insert ("urgency", new Variant.byte (urgency));
         try {
             var id = yield server.send (
-                "Claude", ids.lookup (session.key), app_icon (), summary, body, actions, hints, -1
+                "Claude", ids.lookup (session.key), app_icon, summary, body, actions, hints, -1
             );
             ids.insert (session.key, id);
         } catch (Error e) {
             warning ("Cannot send notification: %s", e.message);
         }
-    }
-
-    // Claude Desktop installs a themed icon; without it, fall back to the terminal the sessions run in.
-    private static string app_icon () {
-        return Gtk.IconTheme.get_default ().has_icon ("claude-desktop") ? "claude-desktop" : "utilities-terminal";
     }
 
     private void on_action_invoked (uint32 id, string action_key) {

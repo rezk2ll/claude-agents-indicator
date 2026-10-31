@@ -65,8 +65,45 @@ public class ClaudeAgents.Session : Object {
     public int64 transcript_mtime = -1;
     public int64 transcript_searched_at;
 
+    private HashTable<string, string>? environment;
+    private int environment_pid;
+
     public Session (string key) {
         this.key = key;
+    }
+
+    // Terminals export the id of the tab a process runs in (PANTHEON_TERMINAL_ID, KITTY_WINDOW_ID, TMUX_PANE...).
+    // A process environment never changes, so it is read once per pid instead of on every poll.
+    public string? environ (string name) {
+        if (environment == null || environment_pid != pid) {
+            environment = read_environment (pid);
+            environment_pid = pid;
+        }
+        return environment.lookup (name);
+    }
+
+    private static HashTable<string, string> read_environment (int pid) {
+        var result = new HashTable<string, string> (str_hash, str_equal);
+        uint8[] data;
+        try {
+            if (pid <= 0) {
+                return result;
+            }
+            FileUtils.get_data ("/proc/%d/environ".printf (pid), out data);
+        } catch (FileError e) {
+            return result;
+        }
+        // Entries are NUL-terminated; the extra NUL guards a truncated last entry.
+        data += 0;
+        for (int start = 0; start < data.length - 1;) {
+            unowned string entry = (string) (&data[start]);
+            var eq = entry.index_of_char ('=');
+            if (eq > 0) {
+                result.insert (entry.substring (0, eq), entry.substring (eq + 1));
+            }
+            start += entry.length + 1;
+        }
+        return result;
     }
 
     public string project {
