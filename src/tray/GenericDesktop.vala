@@ -34,7 +34,9 @@ public class ClaudeAgents.GenericDesktop : Object, Desktop {
     public void activate (Session session, string claude_path) {
         var focus = TerminalFocus.command ((name) => session.environ (name));
         var selected = focus != null && spawn (null, focus);
-        var raised = session.pid > 0 && raise_window (candidates (session));
+        // A background session's parent may still be the terminal that dispatched it, which is not where it runs.
+        var raised = !session.background && session.pid > 0 && compositor != Compositor.NONE
+                     && raise_window (candidates (session));
         if (selected || raised) {
             return;
         }
@@ -53,21 +55,26 @@ public class ClaudeAgents.GenericDesktop : Object, Desktop {
     }
 
     // The processes that may own the session's window, nearest first. Inside tmux the claude process descends
-    // from the tmux server, so the windows are those of the attached clients instead.
+    // from the tmux server, so the windows are those of the clients instead. switch-client moves the most recently
+    // active client, and may not have run yet, so the clients are listed by activity rather than by session.
     private static int[] candidates (Session session) {
         var tmux = session.environ ("TMUX");
-        var pane = session.environ ("TMUX_PANE");
-        if (tmux == null || pane == null) {
+        if (tmux == null || session.environ ("TMUX_PANE") == null) {
             return Windows.ancestors (session.pid);
         }
+        var output = run ({ "tmux", "-S", tmux.split (",")[0], "list-clients", "-F", "#{client_activity} #{client_pid}" });
+        var clients = new GenericArray<string> ();
+        foreach (var line in (output ?? "").split ("\n")) {
+            if (" " in line) {
+                clients.add (line);
+            }
+        }
+        // Activity is a Unix time, so the latest sorts last as text.
+        clients.sort ((a, b) => strcmp (b, a));
         int[] result = {};
-        var clients = run ({ "tmux", "-S", tmux.split (",")[0], "list-clients", "-t", pane, "-F", "#{client_pid}" });
-        foreach (var line in (clients ?? "").split ("\n")) {
-            var client = int.parse (line);
-            if (client > 0) {
-                foreach (var pid in Windows.ancestors (client)) {
-                    result += pid;
-                }
+        foreach (var line in clients.data) {
+            foreach (var pid in Windows.ancestors (int.parse (line.split (" ")[1]))) {
+                result += pid;
             }
         }
         return result;
@@ -109,7 +116,8 @@ public class ClaudeAgents.GenericDesktop : Object, Desktop {
         }
     }
 
-    // KWin runs scripts from files, so the script is written to the runtime directory, loaded, run and unloaded.
+    // KWin runs scripts from files, so the script is written to the runtime directory, loaded and run. KWin reads it
+    // after run returns, so the previous one is unloaded on the next click instead of right away.
     private static bool raise_with_kwin (int[] candidates) {
         var path = Path.build_filename (Environment.get_user_runtime_dir (), KWIN_PLUGIN + ".js");
         try {
@@ -125,7 +133,6 @@ public class ClaudeAgents.GenericDesktop : Object, Desktop {
             } catch (Error e) {
                 kwin_call (bus, "/%d".printf (id), "org.kde.kwin.Script", "run", null);
             }
-            kwin_call (bus, "/Scripting", "org.kde.kwin.Scripting", "unloadScript", new Variant ("(s)", KWIN_PLUGIN));
             return true;
         } catch (Error e) {
             warning ("Cannot raise the window through KWin: %s", e.message);
@@ -137,21 +144,25 @@ public class ClaudeAgents.GenericDesktop : Object, Desktop {
         return bus.call_sync ("org.kde.KWin", path, iface, method, args, null, DBusCallFlags.NONE, 2000);
     }
 
+    // Autostart may run with a shorter PATH than the user's shell, so each compositor counts only if its tool is there.
     private static Compositor detect_compositor () {
         if (Environment.get_variable ("SWAYSOCK") != null) {
-            return Compositor.SWAY;
+            return has ("swaymsg") ? Compositor.SWAY : Compositor.NONE;
         } else if (Environment.get_variable ("HYPRLAND_INSTANCE_SIGNATURE") != null) {
-            return Compositor.HYPRLAND;
+            return has ("hyprctl") ? Compositor.HYPRLAND : Compositor.NONE;
         } else if (Environment.get_variable ("NIRI_SOCKET") != null) {
-            return Compositor.NIRI;
+            return has ("niri") ? Compositor.NIRI : Compositor.NONE;
         } else if ((Environment.get_variable ("XDG_CURRENT_DESKTOP") ?? "").contains ("KDE")) {
             return Compositor.KWIN;
-        } else if (Environment.get_variable ("XDG_SESSION_TYPE") != "wayland" && Environment.get_variable ("DISPLAY") != null
-                   && Environment.find_program_in_path ("xdotool") != null) {
-            return Compositor.X11;
+        } else if (Environment.get_variable ("XDG_SESSION_TYPE") != "wayland" && Environment.get_variable ("DISPLAY") != null) {
+            return has ("xdotool") ? Compositor.X11 : Compositor.NONE;
         }
         // GNOME on Wayland lets no other program raise a window.
         return Compositor.NONE;
+    }
+
+    private static bool has (string program) {
+        return Environment.find_program_in_path (program) != null;
     }
 
     // xdg-terminal-exec is the cross-desktop default terminal; Debian and Ubuntu also ship x-terminal-emulator.
@@ -172,7 +183,6 @@ public class ClaudeAgents.GenericDesktop : Object, Desktop {
         spawn (cwd != null && FileUtils.test (cwd, FileTest.IS_DIR) ? cwd : null, argv);
     }
 
-    // Runs a short query and returns its output, or null when it cannot run or fails.
     private static string? run (string[] argv) {
         try {
             string output;

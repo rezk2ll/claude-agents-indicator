@@ -33,25 +33,17 @@ namespace ClaudeAgents.Windows {
     // `hyprctl clients -j`: a flat array of windows with a pid.
     public int[] hyprland_pids (string json) {
         int[] pids = {};
-        var root = parse (json);
-        if (root != null && root.get_node_type () == Json.NodeType.ARRAY) {
-            foreach (var node in root.get_array ().get_elements ()) {
-                pids += (int) node.get_object ().get_int_member_with_default ("pid", 0);
-            }
+        foreach (var window in objects (parse (json))) {
+            pids += (int) window.get_int_member_with_default ("pid", 0);
         }
         return pids;
     }
 
     // `niri msg --json windows`: a flat array of windows with an id and a pid. Returns -1 when none matches.
     public int64 niri_window (string json, int[] candidates) {
-        var root = parse (json);
-        if (root == null || root.get_node_type () != Json.NodeType.ARRAY) {
-            return -1;
-        }
         int[] pids = {};
         int64[] ids = {};
-        foreach (var node in root.get_array ().get_elements ()) {
-            var window = node.get_object ();
+        foreach (var window in objects (parse (json))) {
             pids += (int) window.get_int_member_with_default ("pid", 0);
             ids += window.get_int_member_with_default ("id", -1);
         }
@@ -103,16 +95,27 @@ if (match) {
             pids += (int) pid;
         }
         foreach (var member in new string[] { "nodes", "floating_nodes" }) {
-            if (!node.has_member (member)) {
-                continue;
-            }
-            foreach (var child in node.get_array_member (member).get_elements ()) {
-                foreach (var nested in collect_sway (child.get_object ())) {
+            foreach (var child in objects (node.get_member (member))) {
+                foreach (var nested in collect_sway (child)) {
                     pids += nested;
                 }
             }
         }
         return pids;
+    }
+
+    // The object elements of a JSON array; anything else yields none.
+    private Json.Object[] objects (Json.Node? node) {
+        Json.Object[] result = {};
+        if (node == null || node.get_node_type () != Json.NodeType.ARRAY) {
+            return result;
+        }
+        foreach (var element in node.get_array ().get_elements ()) {
+            if (element.get_node_type () == Json.NodeType.OBJECT) {
+                result += element.get_object ();
+            }
+        }
+        return result;
     }
 
     private Json.Node? parse (string json) {

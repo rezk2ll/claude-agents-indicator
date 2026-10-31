@@ -116,6 +116,8 @@ void main (string[] args) {
         assert (Windows.niri_window (niri, { 1, 666, 555 }) == 9);
         assert (Windows.niri_window (niri, { 1 }) == -1);
         assert (Windows.sway_pids ("not json").length == 0);
+        assert (Windows.sway_pids ("""{"pid": 8, "nodes": null, "floating_nodes": [3]}""").length == 1);
+        assert (Windows.hyprland_pids ("""[1, null, {"pid": 5}]""").length == 1);
 
         var script = Windows.kwin_script ({ 12, 34 });
         assert ("const pids = [12,34];" in script);
