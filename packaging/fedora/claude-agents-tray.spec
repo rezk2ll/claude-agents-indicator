@@ -42,6 +42,7 @@ desktop-file-validate %{buildroot}%{_datadir}/applications/claude-agents-tray.de
 %license LICENSE
 %doc README.md
 %{_bindir}/claude-agents-tray
+%{_bindir}/claude-agents-status
 %{_datadir}/applications/claude-agents-tray.desktop
 %{_datadir}/icons/hicolor/scalable/apps/claude-agents-tray*.svg
 %config(noreplace) %{_sysconfdir}/xdg/autostart/claude-agents-tray.desktop

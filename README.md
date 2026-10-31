@@ -118,6 +118,28 @@ Claude Code passes your 5-hour and weekly usage to the status line command. If y
 
 With no status line yet, use `cat > "$XDG_RUNTIME_DIR/claude-agents-status.json"` as the command.
 
+## Status bars
+
+The tray package also ships `claude-agents-status`, which prints the sessions once and exits:
+
+```sh
+$ claude-agents-status
+1 need you · 2 working
+```
+
+With `--waybar` it prints the JSON a [waybar custom module](https://github.com/Alexays/Waybar/wiki/Module:-Custom) reads: the waiting count as text, the sessions and usage as the tooltip, and `attention`, `ready`, `working`, `idle` or `error` as the class.
+
+```json
+"custom/claude": {
+  "exec": "claude-agents-status --waybar",
+  "return-type": "json",
+  "interval": 3,
+  "format": "✻ {}"
+}
+```
+
+Style `#custom-claude.attention` to make it stand out. The plain form fits polybar, i3blocks or a tmux `status-right`.
+
 ## Requirements
 
 - Claude Code with agent view (`claude agents --json`).

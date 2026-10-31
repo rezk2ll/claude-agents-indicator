@@ -169,6 +169,25 @@ void main (string[] args) {
         assert (monitor.lookup ("b2") == null);
     });
 
+    Test.add_func ("/summary", () => {
+        var monitor = new SessionMonitor (new FakeDesktop ());
+        assert (Summary.text (monitor.sessions, null) == "no sessions");
+        monitor.apply (FIRST);
+        assert (Summary.text (monitor.sessions, null) == "1 need you · 1 working");
+        assert (Summary.text (monitor.sessions, "claude agents exited with an error") == "claude agents exited with an error");
+
+        var parser = new Json.Parser ();
+        try {
+            parser.load_from_data (Summary.waybar (monitor.sessions, null, null));
+        } catch (Error e) {
+            error (e.message);
+        }
+        var waybar = parser.get_root ().get_object ();
+        assert (waybar.get_string_member ("text") == "1");
+        assert (waybar.get_string_member ("class") == "attention");
+        assert ("Needs You: nightly fix · acme-web · permission prompt" in waybar.get_string_member ("tooltip"));
+    });
+
     Test.run ();
 
     DirUtils.remove (Path.build_filename (home, ".claude", "projects"));
