@@ -19,7 +19,8 @@ Print the JSON a waybar custom module reads with
 .BR "\(dqreturn-type\(dq: \(dqjson\(dq" :
 the waiting count (or the session count when none waits) as text, the sessions
 and usage as the tooltip, and one of attention, ready, working, idle or error as
-the class.
+the class. When usage is known, the percentage is the higher of the 5-hour and
+weekly usage.
 .TP
 .B \-\-follow
 Keep running and print a new line whenever the sessions change.

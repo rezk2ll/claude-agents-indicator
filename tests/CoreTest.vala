@@ -53,6 +53,13 @@ void main (string[] args) {
         }
         assert (usage.refresh (new GenericArray<Session> ()));
         assert (usage.available && usage.five_hour == 42.5 && usage.five_hour_resets_at == 4102444800);
+        var parser = new Json.Parser ();
+        try {
+            parser.load_from_data (Summary.waybar (new GenericArray<Session> (), null, usage));
+        } catch (Error e) {
+            error (e.message);
+        }
+        assert (parser.get_root ().get_object ().get_int_member ("percentage") == 43);
         FileUtils.remove (path);
     });
 
@@ -220,6 +227,7 @@ void main (string[] args) {
         var waybar = parser.get_root ().get_object ();
         assert (waybar.get_string_member ("text") == "1");
         assert (waybar.get_string_member ("class") == "attention");
+        assert (!waybar.has_member ("percentage"));
         assert ("Needs You: nightly fix · acme-web · permission prompt" in waybar.get_string_member ("tooltip"));
 
         try {

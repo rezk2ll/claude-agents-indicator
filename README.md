@@ -137,7 +137,7 @@ $ claude-agents-status
 1 need you · 2 working
 ```
 
-With `--waybar` it prints the JSON a [waybar custom module](https://github.com/Alexays/Waybar/wiki/Module:-Custom) reads: the waiting count as text (or the session count when none waits), the sessions and usage as the tooltip, and `attention`, `ready`, `working`, `idle` or `error` as the class.
+With `--waybar` it prints the JSON a [waybar custom module](https://github.com/Alexays/Waybar/wiki/Module:-Custom) reads: the waiting count as text (or the session count when none waits), the sessions and usage as the tooltip, and `attention`, `ready`, `working`, `idle` or `error` as the class. With usage set up, `{percentage}` is the higher of the 5-hour and weekly usage.
 
 With `--follow` it keeps running and prints a new line whenever the sessions change, so waybar needs no interval:
 

@@ -58,6 +58,11 @@ namespace ClaudeAgents.Summary {
         output.set_string_member ("tooltip", tooltip);
         output.set_string_member ("class", state);
         output.set_string_member ("alt", state);
+        if (usage != null && usage.available) {
+            var used = double.max (Usage.current (usage.five_hour, usage.five_hour_resets_at),
+                                   Usage.current (usage.seven_day, usage.seven_day_resets_at));
+            output.set_int_member ("percentage", (int64) (used + 0.5));
+        }
         var root = new Json.Node (Json.NodeType.OBJECT);
         root.set_object (output);
         var generator = new Json.Generator ();
