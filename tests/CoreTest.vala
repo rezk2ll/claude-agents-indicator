@@ -56,6 +56,38 @@ void main (string[] args) {
         FileUtils.remove (path);
     });
 
+    Test.add_func ("/usage/high", () => {
+        var usage = new Usage ();
+        string[] reported = {};
+        usage.high.connect ((window, used, resets_at) => reported += "%s %.0f".printf (window, used));
+        var dir = Path.build_filename (Environment.get_home_dir (), ".cctop", "status");
+        DirUtils.create_with_parents (dir, 0755);
+        var sessions = new GenericArray<Session> ();
+        int64 mtime = get_real_time () / 1000000;
+        // Each status is a fresher file than the last, so every refresh reads it.
+        string[] statuses = {
+            """{"rate_limits": {"five_hour": {"used_percentage": 85, "resets_at": 4102444800}, "seven_day": {"used_percentage": 50}}}""",
+            """{"rate_limits": {"five_hour": {"used_percentage": 90, "resets_at": 4102444800}, "seven_day": {"used_percentage": 81}}}""",
+            """{"rate_limits": {"five_hour": {"used_percentage": 82, "resets_at": 4102462800}}}""",
+        };
+        foreach (var status in statuses) {
+            var session = new Session ("h%d".printf (sessions.length));
+            session.session_id = session.key;
+            sessions.add (session);
+            var path = Path.build_filename (dir, session.session_id + ".json");
+            try {
+                FileUtils.set_contents (path, status);
+                File.new_for_path (path).set_attribute_uint64 (
+                    FileAttribute.TIME_MODIFIED, ++mtime, FileQueryInfoFlags.NONE
+                );
+            } catch (Error e) {
+                error (e.message);
+            }
+            assert (usage.refresh (sessions));
+        }
+        assert (string.joinv (",", reported) == "5-hour 85,Weekly 81,5-hour 82");
+    });
+
     Test.add_func ("/category/from_status", () => {
         assert (Category.from_status ("waiting") == Category.ATTENTION);
         assert (Category.from_status ("idle") == Category.READY);

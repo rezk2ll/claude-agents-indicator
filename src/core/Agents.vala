@@ -25,6 +25,11 @@ public class ClaudeAgents.Agents : Object {
         monitor.transitioned.connect (on_transition);
         monitor.removed.connect ((session) => notifier.withdraw (session.key));
         monitor.changed.connect (() => desktop.set_dock_badge (monitor.count (Category.ATTENTION)));
+        monitor.usage.high.connect ((window, used, resets_at) => {
+            if (preferences.notifications) {
+                notifier.usage_high (window, used, resets_at);
+            }
+        });
     }
 
     public void activate (Session session) {

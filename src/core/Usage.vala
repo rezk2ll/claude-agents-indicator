@@ -1,4 +1,9 @@
 public class ClaudeAgents.Usage : Object {
+    public const double HIGH = 80;
+
+    // Once per window and reset, so a limit that stays high is reported once.
+    public signal void high (string window, double used, int64 resets_at);
+
     public double five_hour { get; private set; }
     public int64 five_hour_resets_at { get; private set; }
     public double seven_day { get; private set; }
@@ -8,6 +13,8 @@ public class ClaudeAgents.Usage : Object {
     private string status_file;
     private string? source_path;
     private int64 source_mtime = -1;
+    private int64 five_hour_reported = -1;
+    private int64 seven_day_reported = -1;
 
     construct {
         // The JSON Claude Code hands to the status line carries rate_limits. cctop's status-line shim saves it per
@@ -65,6 +72,14 @@ public class ClaudeAgents.Usage : Object {
         five_hour_resets_at = resets_at (limits, "five_hour");
         seven_day = percentage (limits, "seven_day");
         seven_day_resets_at = resets_at (limits, "seven_day");
+        if (current (five_hour, five_hour_resets_at) >= HIGH && five_hour_reported != five_hour_resets_at) {
+            five_hour_reported = five_hour_resets_at;
+            high ("5-hour", five_hour, five_hour_resets_at);
+        }
+        if (current (seven_day, seven_day_resets_at) >= HIGH && seven_day_reported != seven_day_resets_at) {
+            seven_day_reported = seven_day_resets_at;
+            high ("Weekly", seven_day, seven_day_resets_at);
+        }
         return true;
     }
 
