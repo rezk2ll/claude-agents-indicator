@@ -6,6 +6,12 @@ claude-agents-indicator (0.3.0) noble; urgency=medium
     and Konsole, and raises its window on Sway, Hyprland, niri, KDE and X11.
   * Show what a waiting session asks for, such as a permission prompt.
   * Read usage limits from a copy of the status line input, without cctop.
+  * The tray shows the waiting count as its label and title.
+  * New claude-agents-status command for waybar, polybar, i3blocks and tmux,
+    once or with --follow.
+  * claude-agents-tray --jump goes to the session that needs you, for a
+    keyboard shortcut.
+  * On KDE, a session with no window opens the agent view.
 
  -- rezk2ll <6764881+rezk2ll@users.noreply.github.com>  Sat, 31 Oct 2026 18:00:00 +0100
 
