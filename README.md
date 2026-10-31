@@ -34,7 +34,7 @@ Unofficial. Not affiliated with Anthropic.
 - Click a session, or its notification, to jump to its tab. Background sessions open in a new terminal with `claude attach`.
 - A keyboard shortcut for the session that needs you: `claude-agents-tray --jump` (see [Jumping to a session](#jumping-to-a-session)).
 - `claude-agents-status` for waybar, polybar, i3blocks or tmux (see [Status bars](#status-bars)).
-- 5-hour and weekly usage with their reset times, read from your status line (see [Usage limits](#usage-limits)).
+- 5-hour and weekly usage with their reset times, read from your status line (see [Usage limits](#usage-limits)), and a notification when either reaches 80%.
 
 ## Install
 

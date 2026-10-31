@@ -49,6 +49,11 @@ public class ClaudeAgents.Notifier : Object {
         send.begin (session, "%s is done".printf (session.title), "%s · your turn".printf (session.project), URGENCY_NORMAL);
     }
 
+    public void usage_high (string window, double used, int64 resets_at) {
+        post.begin ("usage-" + window, "%s usage at %.0f%%".printf (window, used),
+                    Format.usage (window, used, resets_at), { }, URGENCY_NORMAL);
+    }
+
     public void withdraw (string session_key) {
         var id = ids.lookup (session_key);
         if (id == 0 || server == null) {
@@ -65,21 +70,23 @@ public class ClaudeAgents.Notifier : Object {
     }
 
     private async void send (Session session, string summary, string body, uchar urgency) {
-        if (server == null) {
-            return;
-        }
         string[] actions = { "default", "Show" };
         if (session.reachable) {
             actions += "show";
             actions += session.background ? "Attach" : "Show";
         }
+        yield post (session.key, summary, body, actions, urgency);
+    }
+
+    private async void post (string key, string summary, string body, string[] actions, uchar urgency) {
+        if (server == null) {
+            return;
+        }
         var hints = new HashTable<string, Variant> (str_hash, str_equal);
         hints.insert ("urgency", new Variant.byte (urgency));
         try {
-            var id = yield server.send (
-                "Claude", ids.lookup (session.key), app_icon, summary, body, actions, hints, -1
-            );
-            ids.insert (session.key, id);
+            var id = yield server.send ("Claude", ids.lookup (key), app_icon, summary, body, actions, hints, -1);
+            ids.insert (key, id);
         } catch (Error e) {
             warning ("Cannot send notification: %s", e.message);
         }
