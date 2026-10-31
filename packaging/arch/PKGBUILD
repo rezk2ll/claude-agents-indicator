@@ -11,6 +11,9 @@ makedepends=(git meson vala)
 optdepends=('tmux: raise sessions running in tmux'
             'kitty: raise sessions running in kitty'
             'wezterm: raise sessions running in WezTerm'
+            'ghostty: raise sessions running in Ghostty'
+            'konsole: raise sessions running in Konsole'
+            'xdotool: raise the terminal window on X11'
             'xdg-terminal-exec: open background sessions in your default terminal')
 backup=(etc/xdg/autostart/claude-agents-tray.desktop)
 provides=(claude-agents-tray)
