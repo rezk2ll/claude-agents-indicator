@@ -87,7 +87,7 @@ jobs:
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             meson valac gcc libgtk-3-dev libjson-glib-dev libayatana-appindicator3-dev \
-            xvfb dbus-x11 dbus-daemon xfce4-panel xfwm4 xdotool imagemagick librsvg2-common adwaita-icon-theme fonts-dejavu-core
+            xvfb dbus-x11 dbus-daemon xfce4-panel xfwm4 x11-xserver-utils xdotool imagemagick librsvg2-common adwaita-icon-theme fonts-dejavu-core
 
       - uses: actions/checkout@v7
 

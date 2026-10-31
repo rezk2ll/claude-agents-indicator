@@ -1,13 +1,19 @@
 #!/bin/bash
 # Runs the installed tray app inside a real xfce4-panel on Xvfb, opens its menu and saves screenshots.
-# Needs xfce4-panel, xfwm4, Xvfb, xdotool, imagemagick and librsvg2-common. Usage: tests/tray-xfce.sh OUTPUT_DIR
+# Needs xfce4-panel, xfwm4, Xvfb, xsetroot, xdotool, imagemagick and librsvg2-common. Usage: tests/tray-xfce.sh OUTPUT_DIR
 set -euo pipefail
 
 out=$(realpath "$1")
 tests=$(dirname "$(realpath "$0")")
 work=$(mktemp -d)
 trap 'kill $(jobs -p) 2>/dev/null; rm -rf "$work"' EXIT
-mkdir -p "$out" "$work/.claude/projects"
+mkdir -p "$out" "$work/.claude/projects/-home-me-acme-api" "$work/.claude/projects/-home-me-docs-site" "$work/.cctop/status"
+echo '{"type":"ai-title","aiTitle":"Fix the flaky login test"}' > "$work/.claude/projects/-home-me-acme-api/s-1.jsonl"
+echo '{"type":"ai-title","aiTitle":"Write the install guide"}' > "$work/.claude/projects/-home-me-docs-site/s-3.jsonl"
+now=$(date +%s)
+cat > "$work/.cctop/status/s-1.json" <<EOF
+{"rate_limits":{"five_hour":{"used_percentage":42,"resets_at":$((now + 6060))},"seven_day":{"used_percentage":17,"resets_at":$((now + 280000))}}}
+EOF
 
 Xvfb :96 -screen 0 1024x400x24 >/dev/null 2>&1 &
 sleep 1
@@ -15,9 +21,10 @@ export DISPLAY=:96 PATH="$tests/fake:$PATH" HOME="$work"
 
 dbus-run-session -- bash -c '
     set -euo pipefail
-    xfwm4 >/dev/null 2>&1 &
+    xfwm4 --compositor=off >/dev/null 2>&1 &
     xfce4-panel >/dev/null 2>&1 &
     sleep 4
+    xsetroot -solid "#2e3440"
     claude-agents-tray >/dev/null 2>&1 &
     sleep 6
     import -window root "$1/panel.png"

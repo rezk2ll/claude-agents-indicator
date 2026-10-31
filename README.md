@@ -53,6 +53,8 @@ The panel restarts on its own.
 
 ### Tray app
 
+<img src="docs/tray.png" width="464" alt="The tray menu in XFCE, listing sessions by group with usage below">
+
 On Ubuntu and other desktops:
 
 ```sh
