@@ -37,6 +37,7 @@ def dump():
     get = lambda p: bus.call_sync(service, path, "org.freedesktop.DBus.Properties", "Get",
                                   GLib.Variant("(ss)", ("org.kde.StatusNotifierItem", p)), None, 0, 2000, None).unpack()[0]
     print("Status:", get("Status"), "| IconName:", get("IconName"), "| AttentionIconName:", get("AttentionIconName"))
+    print("Title:", get("Title"), "| Label:", get("XAyatanaLabel"))
     menu = get("Menu")
     layout = bus.call_sync(service, menu, "com.canonical.dbusmenu", "GetLayout",
                            GLib.Variant("(iias)", (0, -1, [])), None, 0, 2000, None).unpack()[1]

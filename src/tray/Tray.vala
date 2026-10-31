@@ -14,6 +14,7 @@ public class ClaudeAgents.Tray : Object {
     private Gtk.Menu? menu;
     private GenericArray<Gtk.MenuItem> items;
     private string layout = "";
+    private int shown_waiting = -1;
 
     construct {
         agents = new Agents (new GenericDesktop ());
@@ -23,7 +24,6 @@ public class ClaudeAgents.Tray : Object {
         );
         indicator.set_title ("Claude Agents");
         indicator.set_attention_icon_full ("claude-agents-tray-attention", "A session needs you");
-        indicator.set_status (AppIndicator.IndicatorStatus.ACTIVE);
 
         agents.monitor.changed.connect (update);
         update ();
@@ -32,7 +32,13 @@ public class ClaudeAgents.Tray : Object {
 
     private void update () {
         var waiting = agents.monitor.count (Category.ATTENTION);
-        indicator.set_status (waiting > 0 ? AppIndicator.IndicatorStatus.ATTENTION : AppIndicator.IndicatorStatus.ACTIVE);
+        if (waiting != shown_waiting) {
+            shown_waiting = waiting;
+            indicator.set_status (waiting > 0 ? AppIndicator.IndicatorStatus.ATTENTION : AppIndicator.IndicatorStatus.ACTIVE);
+            // Hosts that draw labels show the count beside the icon. The title stays fixed: changing it once the item
+            // is registered makes libayatana-appindicator abort when a host reads it (seen on Ubuntu 24.04).
+            indicator.set_label (waiting > 0 ? waiting.to_string () : "", "99");
+        }
 
         var entries = list_entries ();
         var next = new StringBuilder ();

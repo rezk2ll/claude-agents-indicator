@@ -28,6 +28,7 @@ expect() {
 }
 expect "Status: NeedsAttention"
 expect "AttentionIconName: claude-agents-tray-attention"
+expect "Title: Claude Agents | Label: 1"
 expect "Needs You"
 expect "acme-api · permission prompt"
 expect "nightly fix · acme-web"
