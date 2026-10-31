@@ -22,6 +22,26 @@ namespace ClaudeAgents.TerminalFocus {
         if (wezterm_pane != null) {
             return { "wezterm", "cli", "activate-pane", "--pane-id", wezterm_pane };
         }
+
+        // Ghostty exports the surface id from 1.4 on; present-surface selects the tab and presents its window.
+        var ghostty_surface = environ ("GHOSTTY_SURFACE_ID");
+        if (ghostty_surface != null) {
+            return {
+                "gdbus", "call", "--session", "--dest", "com.mitchellh.ghostty", "--object-path", "/com/mitchellh/ghostty",
+                "--method", "org.gtk.Actions.Activate", "present-surface", "[<uint64 %s>]".printf (ghostty_surface), "{}",
+            };
+        }
+
+        // Konsole selects the tab but does not raise its window; the desktop raises the window on its own.
+        var konsole_service = environ ("KONSOLE_DBUS_SERVICE");
+        var konsole_window = environ ("KONSOLE_DBUS_WINDOW");
+        var konsole_session = environ ("KONSOLE_DBUS_SESSION");
+        if (konsole_service != null && konsole_window != null && konsole_session != null) {
+            return {
+                "gdbus", "call", "--session", "--dest", konsole_service, "--object-path", konsole_window,
+                "--method", "org.kde.konsole.Window.setCurrentSession", Path.get_basename (konsole_session),
+            };
+        }
         return null;
     }
 }

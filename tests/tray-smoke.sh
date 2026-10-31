@@ -6,7 +6,7 @@ set -euo pipefail
 tray=$(realpath "$1")
 tests=$(dirname "$(realpath "$0")")
 work=$(mktemp -d)
-trap 'kill $(jobs -p) 2>/dev/null; rm -rf "$work"' EXIT
+trap 'kill $(jobs -p) 2>/dev/null || true; rm -rf "$work"' EXIT
 
 mkdir -p "$work/home/.claude/projects"
 
