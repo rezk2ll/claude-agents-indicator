@@ -103,6 +103,8 @@ It also brings the session's terminal window to the front on Sway, Hyprland, nir
 
 When none of this applies, clicking the session opens the agent view instead. Background sessions open in your default terminal (`xdg-terminal-exec`, or `x-terminal-emulator` on Debian and Ubuntu).
 
+Bind `claude-agents-tray --jump` to a keyboard shortcut to do the same without the menu. It goes to the session that needs you, or else to one whose turn it is, or else opens the agent view.
+
 ## Usage limits
 
 Claude Code passes your 5-hour and weekly usage to the status line command. If you use [cctop](https://github.com/tomstagl/cctop) as your status line, it already works. Otherwise, save a copy of that input in `~/.claude/settings.json`, in front of your current status line command:

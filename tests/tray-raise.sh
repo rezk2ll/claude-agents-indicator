@@ -104,6 +104,15 @@ walk(json.load(sys.stdin))"
         tail -20 "$WORK/kwin.log" 2>/dev/null || true
         exit 1
     fi
+
+    # The shortcut path: a second launch with --jump goes to the waiting session too.
+    focus_other "$other_terminal"
+    sleep 1
+    claude-agents-tray --jump
+    sleep 1
+    focused=$(focus_pid)
+    [ "$focused" = "$session_terminal" ] || { cat "$WORK/tray.log"; echo "FAIL: --jump focused $focused"; exit 1; }
+    echo "PASS: $1 --jump raised the session terminal"
     [ "$1" = kwin ] || exit 0
 
     # A session with no window: KWin reports the miss and the tray opens the agent view instead.

@@ -68,6 +68,19 @@ public class ClaudeAgents.Tray : Object {
         }
     }
 
+    // Goes to the session that needs you, else to one whose turn it is, else to the agent view.
+    public void jump () {
+        foreach (var category in new Category[] { Category.ATTENTION, Category.READY }) {
+            foreach (var session in agents.monitor.sessions) {
+                if (session.category == category) {
+                    agents.activate (session);
+                    return;
+                }
+            }
+        }
+        agents.open_agent_view ();
+    }
+
     private GenericArray<Entry> list_entries () {
         var monitor = agents.monitor;
         var entries = new GenericArray<Entry> ();
@@ -145,6 +158,39 @@ int main (string[] args) {
     // Autostart and the app menu can both launch it; a second launch just exits.
     var app = new Gtk.Application ("io.github.rezk2ll.ClaudeAgentsTray", (ApplicationFlags) 0);
     ClaudeAgents.Tray? tray = null;
+
+    // For a keyboard shortcut: a second launch with --jump asks the running tray to go to the session.
+    var jump = new SimpleAction ("jump", null);
+    jump.activate.connect (() => {
+        if (tray != null) {
+            tray.jump ();
+        }
+    });
+    app.add_action (jump);
+    app.add_main_option ("jump", 0, OptionFlags.NONE, OptionArg.NONE, "Go to the session that needs you", null);
+    app.handle_local_options.connect ((options) => {
+        if (!options.contains ("jump")) {
+            return -1;
+        }
+        try {
+            app.register ();
+        } catch (Error e) {
+            stderr.printf ("%s\n", e.message);
+            return 1;
+        }
+        if (!app.get_is_remote ()) {
+            stderr.printf ("claude-agents-tray is not running\n");
+            return 1;
+        }
+        app.activate_action ("jump", null);
+        try {
+            app.get_dbus_connection ().flush_sync ();
+        } catch (Error e) {
+            return 1;
+        }
+        return 0;
+    });
+
     app.activate.connect (() => {
         if (tray == null) {
             app.hold ();
