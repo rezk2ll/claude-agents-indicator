@@ -104,3 +104,45 @@ jobs:
         with:
           name: xfce-screenshots
           path: screenshots
+
+  rpm:
+    runs-on: ubuntu-24.04
+    container: fedora:latest
+    steps:
+      - name: Install packaging tools
+        run: dnf install -y git rpm-build rpmdevtools dnf-plugins-core
+
+      - uses: actions/checkout@v7
+
+      - name: Build and install the RPM
+        run: |
+          git config --global --add safe.directory "$PWD"
+          spec=packaging/fedora/claude-agents-tray.spec
+          version=$(rpmspec -q --srpm --qf '%{version}' $spec)
+          rpmdev-setuptree
+          git archive --prefix=claude-agents-indicator-$version/ -o ~/rpmbuild/SOURCES/claude-agents-indicator-$version.tar.gz HEAD
+          dnf builddep -y $spec
+          rpmbuild -bb $spec
+          dnf install -y ~/rpmbuild/RPMS/*/claude-agents-tray-$version-*.rpm
+
+  arch:
+    runs-on: ubuntu-24.04
+    container: archlinux:latest
+    steps:
+      - name: Install packaging tools
+        run: pacman -Syu --noconfirm --needed base-devel git
+
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Build and install the package from this checkout
+        run: |
+          git config --system --add safe.directory '*'
+          useradd -m builder
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
+          install -d -o builder /tmp/pkg
+          sed "s|git+\$url.git|git+file://$PWD|" packaging/arch/PKGBUILD > /tmp/pkg/PKGBUILD
+          chown builder /tmp/pkg/PKGBUILD
+          cd /tmp/pkg
+          su builder -c 'makepkg -si --noconfirm'

@@ -66,6 +66,16 @@ It starts on its own from the next login. On stock GNOME (not Ubuntu's), install
 
 Both packages are also attached to each [release](https://github.com/rezk2ll/claude-agents-indicator/releases/latest) as `.deb` files.
 
+On Arch, build the tray app from the latest commit with the bundled PKGBUILD:
+
+```sh
+git clone https://github.com/rezk2ll/claude-agents-indicator
+cd claude-agents-indicator/packaging/arch
+makepkg -si
+```
+
+On Fedora, [`packaging/fedora/claude-agents-tray.spec`](packaging/fedora/claude-agents-tray.spec) builds an RPM from a release tarball with `rpmbuild`.
+
 ## Jumping to a session
 
 The Wingpanel indicator raises the right tab in elementary Terminal.

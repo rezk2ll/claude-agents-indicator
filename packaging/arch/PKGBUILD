@@ -1,0 +1,36 @@
+# Builds the tray app from the latest commit on main.
+pkgname=claude-agents-tray-git
+pkgver=r0
+pkgrel=1
+pkgdesc='Claude Code sessions in the system tray'
+arch=(x86_64 aarch64)
+url='https://github.com/rezk2ll/claude-agents-indicator'
+license=(GPL-3.0-or-later)
+depends=(gtk3 json-glib libayatana-appindicator)
+makedepends=(git meson vala)
+optdepends=('tmux: raise sessions running in tmux'
+            'kitty: raise sessions running in kitty'
+            'wezterm: raise sessions running in WezTerm'
+            'xdg-terminal-exec: open background sessions in your default terminal')
+provides=(claude-agents-tray)
+conflicts=(claude-agents-tray)
+source=("claude-agents-indicator::git+$url.git")
+sha256sums=(SKIP)
+
+pkgver() {
+    cd claude-agents-indicator
+    printf 'r%s.%s' "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+build() {
+    arch-meson claude-agents-indicator build -Dwingpanel=disabled -Dtray=enabled
+    meson compile -C build
+}
+
+check() {
+    meson test -C build
+}
+
+package() {
+    meson install -C build --destdir "$pkgdir"
+}
